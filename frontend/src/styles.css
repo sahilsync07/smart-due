@@ -1,0 +1,242 @@
+:root {
+    --primary: #6366f1;
+    --accent: #4f46e5;
+    --bg: #f7f9fa;
+    --surface: #fff;
+    --text-main: #23272f;
+    --text-subtle: #6b7280;
+    --radius: 13px;
+    --shadow: 0 2px 7px rgba(30, 32, 34, .04);
+}
+
+body {
+    font-family: 'Inter', 'Poppins', Arial, Helvetica, sans-serif;
+    background: var(--bg);
+    margin: 0;
+    padding: 0;
+    color: var(--text-main);
+    min-height: 100vh;
+}
+
+header {
+    background: var(--surface);
+    color: var(--primary);
+    padding: 0.7rem 2rem;
+    box-shadow: var(--shadow);
+    border-bottom-left-radius: var(--radius);
+    border-bottom-right-radius: var(--radius);
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    display: flex;
+    align-items: center;
+    min-height: 46px;
+    /* Navbar is thinner now */
+    transition: box-shadow 0.25s;
+}
+
+header:hover {
+    box-shadow: 0 6px 20px rgba(99, 102, 241, 0.07);
+}
+
+h1 {
+    margin: 0;
+    font-weight: 700;
+    font-size: 1.32rem;
+    letter-spacing: -1px;
+    color: var(--primary);
+    flex: 1;
+}
+
+/* Provide space between buttons when in a group */
+button {
+    background: var(--primary);
+    color: #fff;
+    border: none;
+    padding: 0.55rem 1.25rem;
+    border-radius: var(--radius);
+    font-weight: 500;
+    font-size: 1rem;
+    box-shadow: var(--shadow);
+    cursor: pointer;
+    transition: background 0.2s, box-shadow 0.2s, transform 0.12s;
+    margin-right: 0.75rem;
+    /* Space between buttons */
+    margin-bottom: 0.5rem;
+    /* Space below vertical button layout */
+}
+
+button:last-child {
+    margin-right: 0;
+}
+
+button:hover {
+    background: var(--accent);
+    box-shadow: 0 2px 8px rgba(99, 102, 241, 0.10);
+    transform: translateY(-1px) scale(1.015);
+}
+
+input[type="date"],
+input[type="number"],
+input[type="text"],
+select {
+    padding: 0.6rem 1rem;
+    border: 1.2px solid #ebedf0;
+    border-radius: var(--radius);
+    font-size: 1rem;
+    background: var(--surface);
+    color: var(--text-main);
+    margin-bottom: 0.4rem;
+    transition: border-color 0.13s, box-shadow 0.13s;
+}
+
+input:focus,
+select:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 2.5px var(--primary)33;
+}
+
+/* --- TABLE --- */
+.table-responsive {
+    width: 100%;
+    overflow-x: auto;
+}
+
+table {
+    width: 100%;
+    min-width: 700px;
+    /* prevents squashing on desktop */
+    border-collapse: separate;
+    border-spacing: 0 6px;
+    background: var(--surface);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    margin: 0 auto;
+    animation: fadeIn 0.22s cubic-bezier(.39, .58, .57, 1);
+    table-layout: auto;
+}
+
+thead {
+    background: #f4f5fa;
+}
+
+th,
+td {
+    padding: 0.91rem 1.4rem;
+    /* More horizontal space for data to "breathe" */
+    font-size: 1rem;
+    text-align: left;
+    white-space: nowrap;
+    /* Prevents wrapping by default */
+    overflow: hidden;
+    text-overflow: ellipsis;
+    /* Add ellipsis for overflow */
+    max-width: 210px;
+    /* Max width to avoid huge cells */
+}
+
+td {
+    color: var(--text-main);
+    border-bottom: 1px solid #f2f3f6;
+    background: var(--surface);
+    transition: background 0.18s;
+}
+
+tr:hover td {
+    background: #f5f7fd;
+}
+
+/* If you want certain columns to wrap, add a class to td/th and override white-space */
+.wrap {
+    white-space: normal !important;
+    max-width: 240px;
+}
+
+.container {
+    padding: 2.1rem 1.3rem;
+    max-width: 980px;
+    margin: 0 auto;
+    animation: fadeIn 0.33s cubic-bezier(.44, 0, .63, 1);
+}
+
+.popup {
+    background: rgba(45, 50, 60, 0.14);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    animation: fadeIn 0.15s cubic-bezier(.39, .58, .57, 1);
+    position: fixed;
+    inset: 0;
+    z-index: 20;
+}
+
+.popup>div {
+    background: var(--surface);
+    border-radius: calc(var(--radius) + 4px);
+    box-shadow: 0 10px 30px rgba(99, 102, 241, 0.11);
+    padding: 1.1rem;
+    width: 350px;
+    max-width: 97vw;
+    animation: slideUp 0.17s cubic-bezier(.44, 0, .63, 1);
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes slideUp {
+    from {
+        transform: translateY(12px);
+        opacity: 0;
+    }
+
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+/* ---- Mobile and tablet responsiveness ---- */
+@media (max-width: 900px) {
+
+    table,
+    thead,
+    tbody,
+    th,
+    td,
+    tr {
+        font-size: 0.96rem;
+    }
+
+    .container {
+        padding: 1rem 0.4rem;
+    }
+
+    th,
+    td {
+        padding: 0.65rem 0.9rem;
+        max-width: 130px;
+    }
+
+    .popup>div {
+        width: 95vw;
+        padding: 1rem;
+    }
+}
+
+/* Table: enable horizontal scroll on small screens */
+@media (max-width: 700px) {
+    .table-responsive {
+        overflow-x: auto;
+    }
+
+    table {
+        min-width: 550px;
+    }
+}

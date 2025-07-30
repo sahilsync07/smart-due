@@ -1,0 +1,29 @@
+[
+  {
+    "name": "Duff Beer",
+    "creditDuration": 30,
+    "bankName": "State Bank of India",
+    "accountNo": "XXXX1234",
+    "repeatAccountNo": "XXXX1234",
+    "ifsc": "SBIN0001234",
+    "branch": "Mumbai Main Branch"
+  },
+  {
+    "name": "Soylent Corp",
+    "creditDuration": 60,
+    "bankName": "HDFC Bank",
+    "accountNo": "XXXX5678",
+    "repeatAccountNo": "XXXX5678",
+    "ifsc": "HDFC0001234",
+    "branch": "Delhi Branch"
+  },
+  {
+    "name": "Wayne Enterprises",
+    "creditDuration": 90,
+    "bankName": "ICICI Bank",
+    "accountNo": "XXXX9012",
+    "repeatAccountNo": "XXXX9012",
+    "ifsc": "ICIC0001234",
+    "branch": "Gotham Branch"
+  }
+]
