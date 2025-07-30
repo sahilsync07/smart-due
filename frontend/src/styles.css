@@ -6,7 +6,8 @@
     --text-main: #23272f;
     --text-subtle: #6b7280;
     --radius: 13px;
-    --shadow: 0 2px 7px rgba(30, 32, 34, .04);
+    --shadow: 0 2px 7px rgba(30, 32, 34, 0.04);
+    --input-width: 140px;
 }
 
 body {
@@ -29,14 +30,17 @@ header {
     top: 0;
     z-index: 10;
     display: flex;
+    justify-content: space-between;
     align-items: center;
     min-height: 46px;
-    /* Navbar is thinner now */
     transition: box-shadow 0.25s;
 }
 
-header:hover {
-    box-shadow: 0 6px 20px rgba(99, 102, 241, 0.07);
+header .text-right span {
+    font-weight: 700;
+    font-size: 1.32rem;
+    letter-spacing: -1px;
+    color: var(--primary);
 }
 
 h1 {
@@ -48,7 +52,6 @@ h1 {
     flex: 1;
 }
 
-/* Provide space between buttons when in a group */
 button {
     background: var(--primary);
     color: #fff;
@@ -61,9 +64,7 @@ button {
     cursor: pointer;
     transition: background 0.2s, box-shadow 0.2s, transform 0.12s;
     margin-right: 0.75rem;
-    /* Space between buttons */
     margin-bottom: 0.5rem;
-    /* Space below vertical button layout */
 }
 
 button:last-child {
@@ -86,14 +87,35 @@ select {
     font-size: 1rem;
     background: var(--surface);
     color: var(--text-main);
+    width: var(--input-width);
     margin-bottom: 0.4rem;
     transition: border-color 0.13s, box-shadow 0.13s;
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
 }
 
-input:focus,
+input[type="date"]:focus,
+input[type="number"]:focus,
+input[type="text"]:focus,
 select:focus {
     border-color: var(--primary);
-    box-shadow: 0 0 2.5px var(--primary)33;
+    box-shadow: 0 0 5px rgba(99, 102, 241, 0.3);
+    outline: none;
+}
+
+select {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%236366f1'%3E%3Cpath d='M7 10l5 5 5-5z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 0.7rem center;
+    background-size: 1.2em;
+    cursor: pointer;
+}
+
+select option {
+    padding: 0.5rem;
+    background: var(--surface);
+    color: var(--text-main);
 }
 
 /* --- TABLE --- */
@@ -105,14 +127,13 @@ select:focus {
 table {
     width: 100%;
     min-width: 700px;
-    /* prevents squashing on desktop */
     border-collapse: separate;
     border-spacing: 0 6px;
     background: var(--surface);
     border-radius: var(--radius);
     box-shadow: var(--shadow);
     margin: 0 auto;
-    animation: fadeIn 0.22s cubic-bezier(.39, .58, .57, 1);
+    animation: fadeIn 0.22s cubic-bezier(0.39, 0.58, 0.57, 1);
     table-layout: auto;
 }
 
@@ -123,16 +144,12 @@ thead {
 th,
 td {
     padding: 0.91rem 1.4rem;
-    /* More horizontal space for data to "breathe" */
     font-size: 1rem;
     text-align: left;
     white-space: nowrap;
-    /* Prevents wrapping by default */
     overflow: hidden;
     text-overflow: ellipsis;
-    /* Add ellipsis for overflow */
     max-width: 210px;
-    /* Max width to avoid huge cells */
 }
 
 td {
@@ -146,7 +163,6 @@ tr:hover td {
     background: #f5f7fd;
 }
 
-/* If you want certain columns to wrap, add a class to td/th and override white-space */
 .wrap {
     white-space: normal !important;
     max-width: 240px;
@@ -156,7 +172,20 @@ tr:hover td {
     padding: 2.1rem 1.3rem;
     max-width: 980px;
     margin: 0 auto;
-    animation: fadeIn 0.33s cubic-bezier(.44, 0, .63, 1);
+    animation: fadeIn 0.33s cubic-bezier(0.44, 0, 0.63, 1);
+}
+
+.container .flex {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0;
+    /* Reduced gap to 0.5rem */
+}
+
+.container .flex .space-x-2 span {
+    padding: 0 0.5rem;
+    /* Added padding left and right of "to" */
 }
 
 .popup {
@@ -164,7 +193,7 @@ tr:hover td {
     display: flex;
     align-items: center;
     justify-content: center;
-    animation: fadeIn 0.15s cubic-bezier(.39, .58, .57, 1);
+    animation: fadeIn 0.15s cubic-bezier(0.39, 0.58, 0.57, 1);
     position: fixed;
     inset: 0;
     z-index: 20;
@@ -174,10 +203,30 @@ tr:hover td {
     background: var(--surface);
     border-radius: calc(var(--radius) + 4px);
     box-shadow: 0 10px 30px rgba(99, 102, 241, 0.11);
-    padding: 1.1rem;
-    width: 350px;
-    max-width: 97vw;
-    animation: slideUp 0.17s cubic-bezier(.44, 0, .63, 1);
+    padding: 1.5rem;
+    width: 500px;
+    max-width: 90vw;
+    animation: slideUp 0.17s cubic-bezier(0.44, 0, 0.63, 1);
+}
+
+.popup .form-group {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+.popup .form-group label {
+    flex: 0 0 120px;
+    font-size: 1rem;
+    font-weight: 500;
+    color: var(--text-main);
+}
+
+.popup .form-group input,
+.popup .form-group select {
+    flex: 1;
+    margin: 0;
 }
 
 @keyframes fadeIn {
@@ -202,7 +251,6 @@ tr:hover td {
     }
 }
 
-/* ---- Mobile and tablet responsiveness ---- */
 @media (max-width: 900px) {
 
     table,
@@ -224,13 +272,51 @@ tr:hover td {
         max-width: 130px;
     }
 
+    header {
+        flex-direction: column;
+        padding: 0.5rem 1rem;
+    }
+
+    header .text-right {
+        text-align: right;
+        margin-top: 0.5rem;
+    }
+
+    .container .flex {
+        flex-direction: column;
+        gap: 1rem;
+    }
+
+    .container .flex div {
+        width: 100%;
+    }
+
+    .container input[type="date"] {
+        width: 100%;
+    }
+
     .popup>div {
-        width: 95vw;
+        width: 90vw;
         padding: 1rem;
+    }
+
+    .popup .form-group {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.5rem;
+    }
+
+    .popup .form-group label {
+        flex: none;
+        width: 100%;
+    }
+
+    .popup .form-group input,
+    .popup .form-group select {
+        width: 100%;
     }
 }
 
-/* Table: enable horizontal scroll on small screens */
 @media (max-width: 700px) {
     .table-responsive {
         overflow-x: auto;

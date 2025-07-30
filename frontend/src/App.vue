@@ -4,23 +4,44 @@
       class="bg-purple-600 text-white p-4 flex justify-between items-center"
     >
       <h1 class="text-2xl font-bold">Smart Due</h1>
-      <div class="flex space-x-4">
-        <button
-          @click="openAddBillPopup"
-          class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+      <div class="text-right">
+        <span class="text-2xl font-bold letter-spacing: -1px color: #6366f1"
+          >Sri Brundabana Enterprises</span
         >
-          Add Bill
-        </button>
-        <button
-          @click="openAddBillerPopup"
-          class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded"
-        >
-          Add Biller
-        </button>
-        <input type="date" v-model="dateFilter" class="p-2 rounded" />
       </div>
     </header>
     <div class="container mx-auto p-4">
+      <div class="flex justify-between items-center mb-2">
+        <div class="flex space-x-4">
+          <button
+            @click="openAddBillPopup"
+            class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+          >
+            Add Bill
+          </button>
+          <button
+            @click="openAddBillerPopup"
+            class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded"
+          >
+            Add Biller
+          </button>
+        </div>
+        <div class="flex items-center space-x-2">
+          <input
+            type="date"
+            v-model="dateFilterStart"
+            class="p-2 rounded border"
+            placeholder="Start Date"
+          />
+          <span class="text-gray-600 px-2">to</span>
+          <input
+            type="date"
+            v-model="dateFilterEnd"
+            class="p-2 rounded border"
+            placeholder="End Date"
+          />
+        </div>
+      </div>
       <table class="min-w-full bg-white shadow-md rounded">
         <thead>
           <tr
@@ -80,37 +101,50 @@
       v-if="showAddBillPopup"
       class="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center popup"
     >
-      <div class="bg-white p-6 rounded shadow-lg w-1/3">
-        <h2 class="text-xl mb-4">Add/Edit Bill</h2>
-        <select
-          v-model="newBill.billerName"
-          class="w-full p-2 mb-4 border rounded"
-        >
-          <option
-            v-for="biller in billers"
-            :key="biller.name"
-            :value="biller.name"
+      <div class="bg-white p-6 rounded shadow-lg">
+        <h2 class="text-xl mb-4">{{ isEditing ? "Update Bill" : "Add" }}</h2>
+        <div class="form-group">
+          <label>Biller Name</label>
+          <select
+            v-model="newBill.billerName"
+            class="w-full p-2 border rounded mt-1"
           >
-            {{ biller.name }}
-          </option>
-        </select>
-        <input
-          v-model="newBill.date"
-          type="date"
-          class="w-full p-2 mb-4 border rounded"
-        />
-        <input
-          v-model.number="newBill.amount"
-          type="number"
-          placeholder="Amount"
-          class="w-full p-2 mb-4 border rounded"
-        />
-        <input
-          v-model.number="newBill.dueDuration"
-          type="number"
-          placeholder="Due Duration (days)"
-          class="w-full p-2 mb-4 border rounded"
-        />
+            <option value="" disabled selected>Select Biller</option>
+            <option
+              v-for="biller in billers"
+              :key="biller.name"
+              :value="biller.name"
+            >
+              {{ biller.name }}
+            </option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Billing Date</label>
+          <input
+            v-model="newBill.date"
+            type="date"
+            class="w-full p-2 border rounded mt-1"
+          />
+        </div>
+        <div class="form-group">
+          <label>Amount</label>
+          <input
+            v-model.number="newBill.amount"
+            type="number"
+            placeholder="Enter Amount"
+            class="w-full p-2 border rounded mt-1"
+          />
+        </div>
+        <div class="form-group">
+          <label>Due Duration (days)</label>
+          <input
+            v-model.number="newBill.dueDuration"
+            type="number"
+            placeholder="Enter Due Duration"
+            class="w-full p-2 border rounded mt-1"
+          />
+        </div>
         <div class="flex justify-end space-x-4">
           <button
             @click="saveBill"
@@ -249,7 +283,6 @@ import { ref, computed, onMounted } from "vue";
 
 export default {
   setup() {
-    const dateFilter = ref("");
     const bills = ref([]);
     const billers = ref([]);
     const showAddBillPopup = ref(false);
@@ -259,10 +292,12 @@ export default {
       id: Date.now(),
       billerName: "",
       date: "",
-      amount: 0,
+      amount: null,
       dueDuration: 0,
       active: 1,
     });
+    const dateFilterStart = ref("");
+    const dateFilterEnd = ref("");
     const newBiller = ref({
       name: "",
       creditDuration: 0,
@@ -275,6 +310,7 @@ export default {
     const deletePassword = ref("");
     const selectedBill = ref(null);
     const creditUnit = ref(false);
+    const isEditing = ref(false);
     const today = new Date().toISOString().split("T")[0];
 
     onMounted(() => {
@@ -283,9 +319,22 @@ export default {
     });
 
     const filteredBills = computed(() => {
-      return bills.value.filter(
-        (bill) => !dateFilter.value || bill.date.includes(dateFilter.value)
-      );
+      return bills.value.filter((bill) => {
+        if (!dateFilterStart.value && !dateFilterEnd.value) return true;
+        const billDate = new Date(bill.date);
+        const startDate = dateFilterStart.value
+          ? new Date(dateFilterStart.value)
+          : null;
+        const endDate = dateFilterEnd.value
+          ? new Date(dateFilterEnd.value)
+          : null;
+
+        if (startDate && endDate)
+          return billDate >= startDate && billDate <= endDate;
+        if (startDate) return billDate >= startDate;
+        if (endDate) return billDate <= endDate;
+        return true;
+      });
     });
 
     const selectedBillerCreditDuration = computed(() => {
@@ -341,15 +390,17 @@ export default {
         id: Date.now(),
         billerName: "",
         date: today,
-        amount: 0,
+        amount: null,
         dueDuration: selectedBillerCreditDuration.value,
         active: 1,
       };
+      isEditing.value = false;
       showAddBillPopup.value = true;
     };
 
     const openEditBill = (bill) => {
       newBill.value = { ...bill };
+      isEditing.value = true;
       showAddBillPopup.value = true;
     };
 
@@ -442,7 +493,6 @@ export default {
     };
 
     return {
-      dateFilter,
       bills,
       billers,
       showAddBillPopup,
@@ -454,6 +504,7 @@ export default {
       selectedBill,
       creditUnit,
       today,
+      isEditing,
       filteredBills,
       selectedBillerCreditDuration,
       isBillerValid,
@@ -471,6 +522,8 @@ export default {
       convertCreditDuration,
       saveBiller,
       cancelAddBiller,
+      dateFilterStart,
+      dateFilterEnd,
     };
   },
 };
