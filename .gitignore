@@ -1,32 +1,32 @@
-# Node.js and npm dependencies
+# Node.js
 node_modules/
 package-lock.json
 npm-debug.log*
 
-# Vue.js build output
+# Vue.js
 dist/
 build/
 *.log
 *.map
 
-# Environment variables
+# Environment
 .env
 .env.local
 .env.*.local
 
-# Backend specific (excluding JSON data files)
+# Backend logs
 backend/*.log
 
-# IDE and editor files
+# IDEs
 .idea/
 .vscode/
 *.sublime-project
 *.sublime-workspace
 
-# OS generated files
+# OS
 .DS_Store
 Thumbs.db
 
-# Build artifacts
+# Temporary files
 *.bak
 *.swp
