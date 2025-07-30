@@ -14,9 +14,7 @@ build/
 .env.local
 .env.*.local
 
-# Backend specific
-backend/data/
-backend/*.json
+# Backend specific (excluding JSON data files)
 backend/*.log
 
 # IDE and editor files
