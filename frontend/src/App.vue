@@ -173,7 +173,7 @@
         <h2 class="text-xl mb-4">Confirm Delete</h2>
         <input
           v-model="deletePassword"
-          type="password"
+          type="number"
           placeholder="Enter 'delete' to confirm"
           class="w-full p-2 mb-4 border rounded"
         />
@@ -213,38 +213,13 @@
         </div>
         <div class="form-group">
           <label>Credit Duration</label>
-          <div class="flex items-center">
-            <input
-              v-model.number="newBiller.creditDuration"
-              type="number"
-              placeholder="Enter Credit Duration"
-              class="w-full p-2 border rounded mt-1 mr-2"
-              required
-            />
-            <div class="flex space-x-2">
-              <label class="flex items-center">
-                <input
-                  v-model="creditUnit"
-                  type="radio"
-                  value="days"
-                  class="form-radio h-5 w-5 text-blue-600"
-                  name="creditUnit"
-                  checked
-                />
-                <span class="ml-2">Days</span>
-              </label>
-              <label class="flex items-center">
-                <input
-                  v-model="creditUnit"
-                  type="radio"
-                  value="months"
-                  class="form-radio h-5 w-5 text-blue-600"
-                  name="creditUnit"
-                />
-                <span class="ml-2">Months</span>
-              </label>
-            </div>
-          </div>
+          <input
+            v-model.number="newBiller.creditDuration"
+            type="number"
+            placeholder="Enter Credit Duration (in days)"
+            class="w-full p-2 border rounded mt-1"
+            required
+          />
         </div>
         <div class="form-group">
           <label>Bank Name</label>
@@ -320,7 +295,7 @@
 </template>
 
 <script>
-import { ref, computed, onMounted, watch } from "vue";
+import { ref, computed, onMounted } from "vue";
 
 export default {
   setup() {
@@ -334,14 +309,14 @@ export default {
       billerName: "",
       date: "",
       amount: null,
-      dueDuration: 0,
+      dueDuration: null,
       active: 1,
     });
     const dateFilterStart = ref("");
     const dateFilterEnd = ref("");
     const newBiller = ref({
       name: "",
-      creditDuration: 0,
+      creditDuration: null,
       bankName: "",
       accountNo: "",
       repeatAccountNo: "",
@@ -350,7 +325,6 @@ export default {
     });
     const deletePassword = ref("");
     const selectedBill = ref(null);
-    const creditUnit = ref("days"); // Default to days
     const isEditing = ref(false);
     const today = new Date().toISOString().split("T")[0];
 
@@ -432,7 +406,7 @@ export default {
         billerName: "",
         date: today,
         amount: null,
-        dueDuration: selectedBillerCreditDuration.value,
+        dueDuration: null,
         active: 1,
       };
       isEditing.value = false;
@@ -475,24 +449,15 @@ export default {
     const openAddBillerPopup = () => {
       newBiller.value = {
         name: "",
-        creditDuration: 0,
+        creditDuration: null,
         bankName: "",
         accountNo: "",
         repeatAccountNo: "",
         ifsc: "",
         branch: "",
       };
-      creditUnit.value = "days"; // Reset to days by default
       showAddBillerPopup.value = true;
     };
-
-    const convertCreditDuration = () => {
-      if (creditUnit.value === "months" && newBiller.value.creditDuration) {
-        newBiller.value.creditDuration *= 30;
-      }
-    };
-
-    watch(creditUnit, convertCreditDuration);
 
     const saveBiller = () => {
       if (isBillerValid.value) {
@@ -564,7 +529,6 @@ export default {
       newBiller,
       deletePassword,
       selectedBill,
-      creditUnit,
       today,
       isEditing,
       filteredBills,

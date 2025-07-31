@@ -10,6 +10,59 @@
     --input-width: 140px;
 }
 
+/* Focus styles for accessibility */
+:focus {
+    outline: 0;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.3);
+}
+
+.segmented-control {
+    display: flex;
+    flex-wrap: nowrap;
+    justify-content: center;
+    margin-top: 0.5rem;
+}
+
+.segmented-control input[type="radio"] {
+    clip: rect(0 0 0 0);
+    clip-path: inset(100%);
+    height: 1px;
+    overflow: hidden;
+    position: absolute;
+    white-space: nowrap;
+    width: 1px;
+}
+
+.segmented-control input[type="radio"]:checked+span {
+    box-shadow: 0 0 0 0.0625em #0043ed;
+    background-color: #dee7ff;
+    z-index: 1;
+    color: #0043ed;
+}
+
+.segmented-control label span {
+    display: block;
+    cursor: pointer;
+    background-color: #fff;
+    padding: 0.375em 0.75em;
+    position: relative;
+    margin-left: 0.0625em;
+    box-shadow: 0 0 0 0.0625em #b5bfd9;
+    letter-spacing: 0.05em;
+    color: #3e4963;
+    text-align: center;
+    transition: background-color 0.5s ease;
+}
+
+.segmented-control label:first-child span {
+    border-radius: 0.375em 0 0 0.375em;
+}
+
+.segmented-control label:last-child span {
+    border-radius: 0 0.375em 0.375em 0;
+}
+
 body {
     font-family: 'Inter', 'Poppins', Arial, Helvetica, sans-serif;
     background: var(--bg);
@@ -80,6 +133,7 @@ button:hover {
 input[type="date"],
 input[type="number"],
 input[type="text"],
+input[type="password"],
 select {
     padding: 0.6rem 1rem;
     border: 1.2px solid #ebedf0;
@@ -98,6 +152,7 @@ select {
 input[type="date"]:focus,
 input[type="number"]:focus,
 input[type="text"]:focus,
+input[type="password"]:focus,
 select:focus {
     border-color: var(--primary);
     box-shadow: 0 0 5px rgba(99, 102, 241, 0.3);
@@ -238,40 +293,16 @@ tr:hover td {
     color: var(--text-main);
 }
 
+.popup .form-group .flex {
+    flex: 1;
+    display: flex;
+    align-items: center;
+}
+
 .popup .form-group input,
 .popup .form-group select {
     flex: 1;
     margin: 0;
-}
-
-.form-radio {
-    appearance: none;
-    -webkit-appearance: none;
-    width: 1.2rem;
-    height: 1.2rem;
-    border: 2px solid #ccc;
-    border-radius: 50%;
-    outline: none;
-    cursor: pointer;
-    position: relative;
-}
-
-.form-radio:checked {
-    border-color: var(--primary);
-    background-color: var(--primary);
-}
-
-.form-radio:checked::before {
-    content: '';
-    display: block;
-    width: 0.6rem;
-    height: 0.6rem;
-    background: white;
-    border-radius: 50%;
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
 }
 
 @keyframes fadeIn {
@@ -353,6 +384,10 @@ tr:hover td {
 
     .popup .form-group label {
         flex: none;
+        width: 100%;
+    }
+
+    .popup .form-group .flex {
         width: 100%;
     }
 
