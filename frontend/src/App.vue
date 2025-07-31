@@ -5,7 +5,9 @@
     >
       <h1 class="text-2xl font-bold">Smart Due</h1>
       <div class="text-right">
-        <span class="text-2xl font-bold letter-spacing: -1px color: #6366f1"
+        <span
+          class="text-2xl font-bold"
+          style="letter-spacing: -1px; color: #6366f1"
           >Sri Brundabana Enterprises</span
         >
       </div>
@@ -197,67 +199,106 @@
       v-if="showAddBillerPopup"
       class="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center popup"
     >
-      <div class="bg-white p-6 rounded shadow-lg w-1/3">
+      <div class="bg-white p-6 rounded shadow-lg">
         <h2 class="text-xl mb-4">Add Biller</h2>
-        <input
-          v-model="newBiller.name"
-          type="text"
-          placeholder="Biller Name"
-          class="w-full p-2 mb-4 border rounded"
-          required
-        />
-        <div class="flex items-center mb-4">
+        <div class="form-group">
+          <label>Biller Name</label>
           <input
-            v-model.number="newBiller.creditDuration"
-            type="number"
-            placeholder="Credit Duration"
-            class="w-1/2 p-2 border rounded"
+            v-model="newBiller.name"
+            type="text"
+            placeholder="Enter Biller Name"
+            class="w-full p-2 border rounded mt-1"
             required
           />
-          <label class="ml-2">Days</label>
-          <input
-            v-model="creditUnit"
-            type="checkbox"
-            @change="convertCreditDuration"
-            class="ml-2"
-          />
-          <label>Months</label>
         </div>
-        <input
-          v-model="newBiller.bankName"
-          type="text"
-          placeholder="Bank Name"
-          class="w-full p-2 mb-4 border rounded"
-          required
-        />
-        <input
-          v-model="newBiller.accountNo"
-          type="password"
-          placeholder="Account No"
-          class="w-full p-2 mb-4 border rounded"
-          required
-        />
-        <input
-          v-model="newBiller.repeatAccountNo"
-          type="password"
-          placeholder="Repeat Account No"
-          class="w-full p-2 mb-4 border rounded"
-          required
-        />
-        <input
-          v-model="newBiller.ifsc"
-          type="text"
-          placeholder="IFSC Code"
-          class="w-full p-2 mb-4 border rounded"
-          required
-        />
-        <input
-          v-model="newBiller.branch"
-          type="text"
-          placeholder="Branch"
-          class="w-full p-2 mb-4 border rounded"
-          required
-        />
+        <div class="form-group">
+          <label>Credit Duration</label>
+          <div class="flex items-center">
+            <input
+              v-model.number="newBiller.creditDuration"
+              type="number"
+              placeholder="Enter Credit Duration"
+              class="w-full p-2 border rounded mt-1 mr-2"
+              required
+            />
+            <div class="flex space-x-2">
+              <label class="flex items-center">
+                <input
+                  v-model="creditUnit"
+                  type="radio"
+                  value="days"
+                  class="form-radio h-5 w-5 text-blue-600"
+                  name="creditUnit"
+                  checked
+                />
+                <span class="ml-2">Days</span>
+              </label>
+              <label class="flex items-center">
+                <input
+                  v-model="creditUnit"
+                  type="radio"
+                  value="months"
+                  class="form-radio h-5 w-5 text-blue-600"
+                  name="creditUnit"
+                />
+                <span class="ml-2">Months</span>
+              </label>
+            </div>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Bank Name</label>
+          <input
+            v-model="newBiller.bankName"
+            type="text"
+            placeholder="Enter Bank Name"
+            class="w-full p-2 border rounded mt-1"
+            required
+          />
+        </div>
+        <div class="form-group">
+          <label>Account Number</label>
+          <input
+            v-model="newBiller.accountNo"
+            type="password"
+            placeholder="Enter Account Number"
+            class="w-full p-2 border rounded mt-1 account-no-input"
+            required
+            @paste.prevent
+          />
+        </div>
+        <div class="form-group">
+          <label>Repeat Account Number</label>
+          <input
+            v-model="newBiller.repeatAccountNo"
+            type="text"
+            placeholder="Re-enter Account Number"
+            class="w-full p-2 border rounded mt-1"
+            required
+          />
+        </div>
+        <div class="form-group">
+          <label>IFSC Code</label>
+          <input
+            v-model="newBiller.ifsc"
+            type="text"
+            placeholder="Enter IFSC Code"
+            class="w-full p-2 border rounded mt-1"
+            required
+            @input="fetchBranchName"
+          />
+        </div>
+        <div class="form-group">
+          <label>Branch</label>
+          <input
+            v-model="newBiller.branch"
+            type="text"
+            placeholder="Branch Name"
+            class="w-full p-2 border rounded mt-1"
+            required
+            readonly
+          />
+        </div>
         <div class="flex justify-end space-x-4">
           <button
             @click="saveBiller"
@@ -279,7 +320,7 @@
 </template>
 
 <script>
-import { ref, computed, onMounted } from "vue";
+import { ref, computed, onMounted, watch } from "vue";
 
 export default {
   setup() {
@@ -309,7 +350,7 @@ export default {
     });
     const deletePassword = ref("");
     const selectedBill = ref(null);
-    const creditUnit = ref(false);
+    const creditUnit = ref("days"); // Default to days
     const isEditing = ref(false);
     const today = new Date().toISOString().split("T")[0];
 
@@ -441,14 +482,17 @@ export default {
         ifsc: "",
         branch: "",
       };
+      creditUnit.value = "days"; // Reset to days by default
       showAddBillerPopup.value = true;
     };
 
     const convertCreditDuration = () => {
-      if (creditUnit.value && newBiller.value.creditDuration) {
+      if (creditUnit.value === "months" && newBiller.value.creditDuration) {
         newBiller.value.creditDuration *= 30;
       }
     };
+
+    watch(creditUnit, convertCreditDuration);
 
     const saveBiller = () => {
       if (isBillerValid.value) {
@@ -492,6 +536,24 @@ export default {
         .catch((error) => console.error("Error saving data:", error));
     };
 
+    const fetchBranchName = async () => {
+      const ifsc = newBiller.value.ifsc.toUpperCase();
+      if (ifsc.length === 11) {
+        try {
+          const response = await fetch(`https://ifsc.razorpay.com/${ifsc}`);
+          if (response.ok) {
+            const data = await response.json();
+            newBiller.value.branch = data.BRANCH || "Branch not found";
+          } else {
+            newBiller.value.branch = "Invalid IFSC or Branch not found";
+          }
+        } catch (error) {
+          console.error("Error fetching branch:", error);
+          newBiller.value.branch = "Error fetching branch";
+        }
+      }
+    };
+
     return {
       bills,
       billers,
@@ -519,11 +581,11 @@ export default {
       cancelAddBill,
       cancelDelete,
       openAddBillerPopup,
-      convertCreditDuration,
       saveBiller,
       cancelAddBiller,
       dateFilterStart,
       dateFilterEnd,
+      fetchBranchName,
     };
   },
 };

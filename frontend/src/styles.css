@@ -118,6 +118,23 @@ select option {
     color: var(--text-main);
 }
 
+.account-no-input {
+    -webkit-text-security: disc;
+    /* For Safari */
+    -moz-text-security: disc;
+    /* For Firefox (not widely supported) */
+    font-family: 'text-security-disc', sans-serif;
+    /* Fallback for other browsers */
+    -webkit-user-select: none;
+    /* Safari */
+    -moz-user-select: none;
+    /* Firefox */
+    -ms-user-select: none;
+    /* IE10+ */
+    user-select: none;
+    /* Standard syntax */
+}
+
 /* --- TABLE --- */
 .table-responsive {
     width: 100%;
@@ -180,12 +197,10 @@ tr:hover td {
     justify-content: space-between;
     align-items: center;
     margin-bottom: 0;
-    /* Reduced gap to 0.5rem */
 }
 
 .container .flex .space-x-2 span {
     padding: 0 0.5rem;
-    /* Added padding left and right of "to" */
 }
 
 .popup {
@@ -227,6 +242,36 @@ tr:hover td {
 .popup .form-group select {
     flex: 1;
     margin: 0;
+}
+
+.form-radio {
+    appearance: none;
+    -webkit-appearance: none;
+    width: 1.2rem;
+    height: 1.2rem;
+    border: 2px solid #ccc;
+    border-radius: 50%;
+    outline: none;
+    cursor: pointer;
+    position: relative;
+}
+
+.form-radio:checked {
+    border-color: var(--primary);
+    background-color: var(--primary);
+}
+
+.form-radio:checked::before {
+    content: '';
+    display: block;
+    width: 0.6rem;
+    height: 0.6rem;
+    background: white;
+    border-radius: 50%;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
 }
 
 @keyframes fadeIn {
