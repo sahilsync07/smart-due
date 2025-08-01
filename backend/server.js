@@ -6,7 +6,14 @@ let billData = [];
 let billerData = [];
 
 app.use(express.json());
-app.use(cors());
+app.use(
+  cors({
+    origin:
+      process.env.NODE_ENV === "production"
+        ? "https://sahilsync07.github.io"
+        : "http://localhost:3000",
+  })
+);
 
 // Load data on startup
 const loadData = async () => {
@@ -35,7 +42,7 @@ app.get("/biller-data.json", (req, res) => {
   res.json(billerData);
 });
 
-// PUT /bill-data.json
+// PUT /bill-data.json (Sync with frontend data)
 app.put("/bill-data.json", (req, res) => {
   billData = req.body;
   fs.writeFile("bill-data.json", JSON.stringify(billData, null, 2), "utf8")
@@ -43,7 +50,7 @@ app.put("/bill-data.json", (req, res) => {
     .catch(() => res.status(500).send("Error saving bill data"));
 });
 
-// PUT /biller-data.json
+// PUT /biller-data.json (Sync with frontend data)
 app.put("/biller-data.json", (req, res) => {
   billerData = req.body;
   fs.writeFile("biller-data.json", JSON.stringify(billerData, null, 2), "utf8")
@@ -53,5 +60,9 @@ app.put("/biller-data.json", (req, res) => {
 
 const port = process.env.PORT || 3001;
 app.listen(port, () => {
-  console.log(`Server running on port ${port}`);
+  console.log(
+    `Server running on port ${port} in ${
+      process.env.NODE_ENV || "development"
+    } environment`
+  );
 });

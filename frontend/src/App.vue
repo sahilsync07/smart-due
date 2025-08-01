@@ -6,10 +6,14 @@
       <h1 class="text-2xl font-bold">Smart Due</h1>
       <div class="text-right">
         <span
-          class="text-2xl font-bold"
+          class="text-xl font-bold"
           style="letter-spacing: -1px; color: #6366f1"
-          >Sri Brundabana Enterprises</span
         >
+          Sri Brundabana Enterprises
+        </span>
+        <div class="text-sm ml-4 inline-block">
+          Server: {{ serverStatus }} (Last Refreshed: {{ lastRefreshed }})
+        </div>
       </div>
     </header>
     <div class="container mx-auto p-4">
@@ -295,7 +299,7 @@
 </template>
 
 <script>
-import { ref, computed, onMounted } from "vue";
+import { ref, computed, onMounted, watch } from "vue";
 
 export default {
   setup() {
@@ -328,9 +332,62 @@ export default {
     const isEditing = ref(false);
     const today = new Date().toISOString().split("T")[0];
 
+    const serverStatus = ref("Offline");
+    const lastRefreshed = ref(new Date().toLocaleString());
+
+    const baseURL =
+      process.env.NODE_ENV === "production"
+        ? "https://smart-due.onrender.com"
+        : "http://localhost:3001";
+
+    const syncWithBackend = async () => {
+      try {
+        // Send current frontend data to backend to sync on wake-up
+        await Promise.all([
+          fetch(`${baseURL}/bill-data.json`, {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(bills.value),
+          }),
+          fetch(`${baseURL}/biller-data.json`, {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(billers.value),
+          }),
+        ]);
+
+        // Fetch fresh data from backend
+        const [billRes, billerRes] = await Promise.all([
+          fetch(`${baseURL}/bill-data.json`),
+          fetch(`${baseURL}/biller-data.json`),
+        ]);
+        if (billRes.ok && billerRes.ok) {
+          bills.value = (await billRes.json()).filter((b) => b.active === 1);
+          billers.value = await billerRes.json();
+          localStorage.setItem("billData", JSON.stringify(bills.value));
+          localStorage.setItem("billerData", JSON.stringify(billers.value));
+          serverStatus.value = "Online";
+          lastRefreshed.value = new Date().toLocaleString();
+        } else {
+          serverStatus.value = "Offline (Server waking up...)";
+        }
+      } catch (error) {
+        serverStatus.value = "Offline";
+        console.error("Sync error:", error);
+        // Retry after 5 seconds if offline
+        setTimeout(syncWithBackend, 5000);
+      }
+    };
+
     onMounted(() => {
-      fetchBills();
-      fetchBillers();
+      // Load from localStorage on mount
+      bills.value = JSON.parse(localStorage.getItem("billData") || "[]").filter(
+        (b) => b.active === 1
+      );
+      billers.value = JSON.parse(localStorage.getItem("billerData") || "[]");
+      syncWithBackend();
+      const interval = setInterval(syncWithBackend, 30000); // Poll every 30 seconds
+      return () => clearInterval(interval);
     });
 
     const filteredBills = computed(() => {
@@ -432,14 +489,19 @@ export default {
       } else {
         bills.value.push(newBill.value);
       }
-      saveToJson("http://localhost:3001/bill-data.json", bills.value);
+      localStorage.setItem("billData", JSON.stringify(bills.value));
+      syncWithBackend(); // Sync with backend
       showAddBillPopup.value = false;
     };
 
     const confirmDelete = () => {
       if (deletePassword.value === "delete") {
         selectedBill.value.active = 0;
-        saveToJson("http://localhost:3001/bill-data.json", bills.value);
+        bills.value = bills.value.filter(
+          (b) => b.id !== selectedBill.value.id || b.active === 1
+        );
+        localStorage.setItem("billData", JSON.stringify(bills.value));
+        syncWithBackend(); // Sync with backend
         showDeletePopup.value = false;
       }
     };
@@ -462,44 +524,13 @@ export default {
     const saveBiller = () => {
       if (isBillerValid.value) {
         billers.value.push({ ...newBiller.value });
-        saveToJson("http://localhost:3001/biller-data.json", billers.value);
+        localStorage.setItem("billerData", JSON.stringify(billers.value));
+        syncWithBackend(); // Sync with backend
         showAddBillerPopup.value = false;
       }
     };
 
     const cancelAddBiller = () => (showAddBillerPopup.value = false);
-
-    const fetchBills = () => {
-      fetch("http://localhost:3001/bill-data.json")
-        .then((res) => res.json())
-        .then((data) => (bills.value = data.filter((b) => b.active === 1)))
-        .catch((error) => {
-          console.error("Error fetching bills:", error);
-          bills.value = [];
-        });
-    };
-
-    const fetchBillers = () => {
-      fetch("http://localhost:3001/biller-data.json")
-        .then((res) => res.json())
-        .then((data) => (billers.value = data))
-        .catch((error) => {
-          console.error("Error fetching billers:", error);
-          billers.value = [];
-        });
-    };
-
-    const saveToJson = (url, data) => {
-      fetch(url, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(data),
-      })
-        .then((res) => {
-          if (!res.ok) throw new Error("Failed to save data");
-        })
-        .catch((error) => console.error("Error saving data:", error));
-    };
 
     const fetchBranchName = async () => {
       const ifsc = newBiller.value.ifsc.toUpperCase();
@@ -549,6 +580,8 @@ export default {
       cancelAddBiller,
       dateFilterStart,
       dateFilterEnd,
+      serverStatus,
+      lastRefreshed,
       fetchBranchName,
     };
   },
