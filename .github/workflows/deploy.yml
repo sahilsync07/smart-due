@@ -1,12 +1,14 @@
-name: Deploy to GitHub Pages
+name: Build and Deploy to gh-pages
 
 on:
   push:
-    branches:
-      - main
+    branches: [main]
+
+permissions:
+  contents: write
 
 jobs:
-  deploy:
+  build-and-deploy:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -15,25 +17,24 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: "20"
+          node-version: "20.x"
+          cache: "npm"
+          cache-dependency-path: frontend/package-lock.json
 
       - name: Install dependencies
-        run: npm install
-        working-directory: ./frontend
-
-      - name: Build
-        run: npm run build
-        working-directory: ./frontend
-
-      - name: Move dist to docs
         run: |
-          mkdir -p docs
-          cp -r frontend/dist/* docs/
-          # Remove the dist folder if you don't want it in the repo
-          # rm -rf frontend/dist
+          cd frontend
+          npm install
 
-      - name: Deploy to GitHub Pages
-        uses: peaceiris/actions-gh-pages@v3
+      - name: Build frontend
+        run: |
+          cd frontend
+          npm run build
+
+      - name: Deploy to gh-pages
+        uses: peaceiris/actions-gh-pages@v4
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./docs
+          publish_dir: frontend/dist
+          publish_branch: gh-pages
+          force_orphan: true
