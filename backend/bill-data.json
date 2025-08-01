@@ -2,7 +2,7 @@
   {
     "id": 1,
     "billerName": "Duff Beer",
-    "date": "2025-07-28",
+    "date": "2025-07-10",
     "amount": 5000,
     "dueDuration": 30,
     "active": 1
@@ -22,13 +22,5 @@
     "amount": 10000,
     "dueDuration": 90,
     "active": 1
-  },
-  {
-    "id": 4,
-    "billerName": "Duff Beer",
-    "date": "2025-07-15",
-    "amount": 3000,
-    "dueDuration": 30,
-    "active": 0
   }
 ]
