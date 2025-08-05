@@ -141,7 +141,7 @@ select {
     font-size: 1rem;
     background: var(--surface);
     color: var(--text-main);
-    width: var(--input-width);
+    width: 100%;
     margin-bottom: 0.4rem;
     transition: border-color 0.13s, box-shadow 0.13s;
     appearance: none;
@@ -175,36 +175,28 @@ select option {
 
 .account-no-input {
     -webkit-text-security: disc;
-    /* For Safari */
-    -moz-text-security: disc;
-    /* For Firefox (not widely supported) */
     font-family: 'text-security-disc', sans-serif;
-    /* Fallback for other browsers */
     -webkit-user-select: none;
-    /* Safari */
     -moz-user-select: none;
-    /* Firefox */
     -ms-user-select: none;
-    /* IE10+ */
     user-select: none;
-    /* Standard syntax */
 }
 
 /* --- TABLE --- */
 .table-responsive {
     width: 100%;
-    overflow-x: auto;
+    overflow-x: hidden;
+    /* Remove horizontal scrollbar */
 }
 
 table {
     width: 100%;
-    min-width: 700px;
     border-collapse: separate;
     border-spacing: 0 6px;
     background: var(--surface);
     border-radius: var(--radius);
     box-shadow: var(--shadow);
-    margin: 0 auto;
+    margin: 0;
     animation: fadeIn 0.22s cubic-bezier(0.39, 0.58, 0.57, 1);
     table-layout: auto;
 }
@@ -215,13 +207,12 @@ thead {
 
 th,
 td {
-    padding: 0.91rem 1.4rem;
+    padding: 0.91rem 1rem;
     font-size: 1rem;
     text-align: left;
-    white-space: nowrap;
+    white-space: normal;
     overflow: hidden;
     text-overflow: ellipsis;
-    max-width: 210px;
 }
 
 td {
@@ -237,13 +228,12 @@ tr:hover td {
 
 .wrap {
     white-space: normal !important;
-    max-width: 240px;
 }
 
 .container {
-    padding: 2.1rem 1.3rem;
-    max-width: 980px;
-    margin: 0 auto;
+    padding: 1rem;
+    max-width: 100%;
+    margin: 0;
     animation: fadeIn 0.33s cubic-bezier(0.44, 0, 0.63, 1);
 }
 
@@ -259,7 +249,7 @@ tr:hover td {
 }
 
 .popup {
-    background: rgba(45, 50, 60, 0.14);
+    background: rgba(45, 50, 60, 0.75);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -272,11 +262,15 @@ tr:hover td {
 .popup>div {
     background: var(--surface);
     border-radius: calc(var(--radius) + 4px);
-    box-shadow: 0 10px 30px rgba(99, 102, 241, 0.11);
+    box-shadow: 0 10px 30px rgba(99, 102, 241, 0.15);
     padding: 1.5rem;
-    width: 500px;
-    max-width: 90vw;
+    width: 100%;
+    max-width: 95vw;
+    max-height: 80vh;
+    overflow-y: auto;
+    overflow-x: hidden;
     animation: slideUp 0.17s cubic-bezier(0.44, 0, 0.63, 1);
+    margin: 0 1rem;
 }
 
 .popup .form-group {
@@ -303,6 +297,22 @@ tr:hover td {
 .popup .form-group select {
     flex: 1;
     margin: 0;
+}
+
+.text-blue-500 {
+    color: #3b82f6 !important;
+}
+
+.text-green-500 {
+    color: #22c55e !important;
+}
+
+.text-red-500 {
+    color: #ef4444 !important;
+}
+
+.text-yellow-500 {
+    color: #eab308 !important;
 }
 
 @keyframes fadeIn {
@@ -339,13 +349,12 @@ tr:hover td {
     }
 
     .container {
-        padding: 1rem 0.4rem;
+        padding: 0.5rem;
     }
 
     th,
     td {
-        padding: 0.65rem 0.9rem;
-        max-width: 130px;
+        padding: 0.65rem 0.5rem;
     }
 
     header {
@@ -372,8 +381,9 @@ tr:hover td {
     }
 
     .popup>div {
-        width: 90vw;
+        width: 95vw;
         padding: 1rem;
+        margin: 0 0.5rem;
     }
 
     .popup .form-group {
@@ -399,10 +409,10 @@ tr:hover td {
 
 @media (max-width: 700px) {
     .table-responsive {
-        overflow-x: auto;
+        overflow-x: hidden;
     }
 
     table {
-        min-width: 550px;
+        width: 100%;
     }
 }
