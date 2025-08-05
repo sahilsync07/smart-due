@@ -11,9 +11,6 @@
         >
           Sri Brundabana Enterprises
         </span>
-        <div class="text-sm ml-4 inline-block">
-          Server: {{ serverStatus }} (Last Refreshed: {{ lastRefreshed }})
-        </div>
       </div>
     </header>
     <div class="container mx-auto p-4">
@@ -24,6 +21,12 @@
             class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
           >
             Add Bill
+          </button>
+          <button
+            @click="openShowBillerPopup"
+            class="bg-indigo-500 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded"
+          >
+            Show Biller
           </button>
           <button
             @click="openAddBillerPopup"
@@ -53,11 +56,9 @@
           <tr
             class="bg-gray-200 text-gray-600 uppercase text-sm leading-normal"
           >
-            <th class="py-3 px-6 text-left">Billing Date</th>
-            <th class="py-3 px-6 text-left">Biller Name</th>
-            <th class="py-3 px-6 text-left">Bill Amount</th>
-            <th class="py-3 px-6 text-left">Due in</th>
-            <th class="py-3 px-6 text-left">Due On</th>
+            <th class="py-3 px-6 text-left">Biller</th>
+            <th class="py-3 px-6 text-left">Amount</th>
+            <th class="py-3 px-6 text-left">Due Date</th>
             <th class="py-3 px-6 text-left">Status</th>
             <th class="py-3 px-6 text-left">Action</th>
           </tr>
@@ -65,233 +66,292 @@
         <tbody>
           <tr
             v-for="bill in filteredBills"
-            :key="bill.id"
+            :key="bill.biller + bill.due_date"
             class="border-b hover:bg-gray-100"
           >
-            <td class="py-3 px-6">{{ bill.date }}</td>
-            <td class="py-3 px-6">{{ bill.billerName }}</td>
-            <td class="py-3 px-6">{{ bill.amount }}</td>
-            <td class="py-3 px-6">{{ getDueInDays(bill) }}</td>
-            <td class="py-3 px-6">{{ getDueOnDate(bill) }}</td>
+            <td class="py-3 px-6">{{ bill.biller }}</td>
+            <td class="py-3 px-6">{{ formatIndianCurrency(bill.amount) }}</td>
+            <td class="py-3 px-6">{{ formatIndianDate(bill.due_date) }}</td>
             <td
               class="py-3 px-6"
               :class="{
-                'text-red-500': getStatus(bill) === 'Overdue',
-                'text-yellow-500': getStatus(bill) === 'Due',
+                'text-blue-500': getStatus(bill) === 'Paid',
                 'text-green-500': getStatus(bill) === 'No Due',
+                'text-red-500': getStatus(bill) === 'Overdue',
               }"
             >
               {{ getStatus(bill) }}
             </td>
             <td class="py-3 px-6">
               <button
-                @click="openEditBill(bill)"
-                class="bg-yellow-500 hover:bg-yellow-700 text-white font-bold py-1 px-2 rounded mr-2"
+                @click="openEditBillPopup(bill)"
+                class="bg-teal-500 hover:bg-teal-700 text-white font-bold py-1 px-2 rounded mr-2"
               >
-                Update
+                Edit Bill
               </button>
               <button
-                @click="openDeletePopup(bill)"
-                class="bg-red-500 hover:bg-red-700 text-white font-bold py-1 px-2 rounded"
+                @click="openMarkAsPaidPopup(bill)"
+                class="bg-yellow-500 hover:bg-yellow-700 text-white font-bold py-1 px-2 rounded"
               >
-                Delete
+                Mark as Paid
               </button>
             </td>
           </tr>
         </tbody>
       </table>
-    </div>
 
-    <!-- Add Bill Popup -->
-    <div
-      v-if="showAddBillPopup"
-      class="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center popup"
-    >
-      <div class="bg-white p-6 rounded shadow-lg">
-        <h2 class="text-xl mb-4">{{ isEditing ? "Update Bill" : "Add" }}</h2>
-        <div class="form-group">
-          <label>Biller Name</label>
-          <select
-            v-model="newBill.billerName"
-            class="w-full p-2 border rounded mt-1"
-          >
-            <option value="" disabled selected>Select Biller</option>
-            <option
-              v-for="biller in billers"
-              :key="biller.name"
-              :value="biller.name"
+      <!-- Show Biller Popup -->
+      <div
+        v-if="showShowBillerPopup"
+        class="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center popup"
+      >
+        <div
+          class="bg-white p-6 rounded shadow-lg max-h-[80vh] overflow-y-auto"
+        >
+          <h2 class="text-xl mb-4">Biller List</h2>
+          <table class="min-w-full bg-white shadow-md rounded">
+            <thead>
+              <tr
+                class="bg-gray-200 text-gray-600 uppercase text-sm leading-normal"
+              >
+                <th class="py-3 px-6 text-left">Name</th>
+                <th class="py-3 px-6 text-left">Credit Duration</th>
+                <th class="py-3 px-6 text-left">Account No</th>
+                <th class="py-3 px-6 text-left">IFSC</th>
+                <th class="py-3 px-6 text-left">Bank Name</th>
+                <th class="py-3 px-6 text-left">Branch</th>
+                <th class="py-3 px-6 text-left">Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr
+                v-for="biller in billers"
+                :key="biller.name"
+                class="border-b hover:bg-gray-100"
+              >
+                <td class="py-3 px-6">{{ biller.name }}</td>
+                <td class="py-3 px-6">{{ biller.creditDuration }}</td>
+                <td class="py-3 px-6">{{ biller.accountNo }}</td>
+                <td class="py-3 px-6">{{ biller.ifsc }}</td>
+                <td class="py-3 px-6">{{ biller.bankName }}</td>
+                <td class="py-3 px-6">{{ biller.branch }}</td>
+                <td class="py-3 px-6">
+                  <button
+                    @click="openEditBillerPopup(biller)"
+                    class="bg-teal-500 hover:bg-teal-700 text-white font-bold py-1 px-2 rounded"
+                  >
+                    Edit Biller
+                  </button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+          <div class="flex justify-end mt-4">
+            <button
+              @click="cancelShowBiller"
+              class="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded"
             >
-              {{ biller.name }}
-            </option>
-          </select>
-        </div>
-        <div class="form-group">
-          <label>Billing Date</label>
-          <input
-            v-model="newBill.date"
-            type="date"
-            class="w-full p-2 border rounded mt-1"
-          />
-        </div>
-        <div class="form-group">
-          <label>Amount</label>
-          <input
-            v-model.number="newBill.amount"
-            type="number"
-            placeholder="Enter Amount"
-            class="w-full p-2 border rounded mt-1"
-          />
-        </div>
-        <div class="form-group">
-          <label>Due Duration (days)</label>
-          <input
-            v-model.number="newBill.dueDuration"
-            type="number"
-            placeholder="Enter Due Duration"
-            class="w-full p-2 border rounded mt-1"
-          />
-        </div>
-        <div class="flex justify-end space-x-4">
-          <button
-            @click="saveBill"
-            class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
-          >
-            Save
-          </button>
-          <button
-            @click="cancelAddBill"
-            class="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded"
-          >
-            Cancel
-          </button>
+              Close
+            </button>
+          </div>
         </div>
       </div>
-    </div>
 
-    <!-- Delete Confirmation Popup -->
-    <div
-      v-if="showDeletePopup"
-      class="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center popup"
-    >
-      <div class="bg-white p-6 rounded shadow-lg w-1/3">
-        <h2 class="text-xl mb-4">Confirm Delete</h2>
-        <input
-          v-model="deletePassword"
-          type="number"
-          placeholder="Enter 'delete' to confirm"
-          class="w-full p-2 mb-4 border rounded"
-        />
-        <div class="flex justify-end space-x-4">
-          <button
-            @click="confirmDelete"
-            class="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded"
-          >
-            Confirm
-          </button>
-          <button
-            @click="cancelDelete"
-            class="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded"
-          >
-            Cancel
-          </button>
+      <!-- Add/Edit Bill Popup -->
+      <div
+        v-if="showAddBillPopup"
+        class="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center popup"
+      >
+        <div class="bg-white p-6 rounded shadow-lg">
+          <h2 class="text-xl mb-4">
+            {{ editBillMode ? "Edit Bill" : "Add Bill" }}
+          </h2>
+          <div class="form-group">
+            <label>Biller</label>
+            <select
+              v-model="newBill.biller"
+              class="w-full p-2 border rounded mt-1"
+              required
+            >
+              <option
+                v-for="biller in billers"
+                :key="biller.name"
+                :value="biller.name"
+              >
+                {{ biller.name }}
+              </option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Amount</label>
+            <input
+              v-model.number="newBill.amount"
+              type="number"
+              class="w-full p-2 border rounded mt-1"
+              required
+            />
+          </div>
+          <div class="form-group">
+            <label>Due Date</label>
+            <input
+              v-model="newBill.due_date"
+              type="date"
+              class="w-full p-2 border rounded mt-1"
+              required
+            />
+          </div>
+          <div class="form-group">
+            <label>Remarks</label>
+            <input
+              v-model="newBill.remarks"
+              type="text"
+              class="w-full p-2 border rounded mt-1"
+            />
+          </div>
+          <div class="flex justify-end space-x-4">
+            <button
+              @click="saveBill"
+              class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+            >
+              {{ editBillMode ? "Update" : "Save" }}
+            </button>
+            <button
+              @click="cancelAddBill"
+              class="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded"
+            >
+              Cancel
+            </button>
+          </div>
         </div>
       </div>
-    </div>
 
-    <!-- Add Biller Popup -->
-    <div
-      v-if="showAddBillerPopup"
-      class="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center popup"
-    >
-      <div class="bg-white p-6 rounded shadow-lg">
-        <h2 class="text-xl mb-4">Add Biller</h2>
-        <div class="form-group">
-          <label>Biller Name</label>
+      <!-- Mark as Paid Confirmation Popup -->
+      <div
+        v-if="showMarkAsPaidPopup"
+        class="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center popup"
+      >
+        <div class="bg-white p-6 rounded shadow-lg w-1/3">
+          <h2 class="text-xl mb-4">Confirm Mark as Paid</h2>
           <input
-            v-model="newBiller.name"
+            v-model="markAsPaidPassword"
             type="text"
-            placeholder="Enter Biller Name"
-            class="w-full p-2 border rounded mt-1"
-            required
+            placeholder="Enter 'aparna' or 'slnp' to confirm"
+            class="w-full p-2 mb-4 border rounded"
           />
+          <div class="flex justify-end space-x-4">
+            <button
+              @click="confirmMarkAsPaid"
+              class="bg-yellow-500 hover:bg-yellow-700 text-white font-bold py-2 px-4 rounded"
+            >
+              Confirm
+            </button>
+            <button
+              @click="cancelMarkAsPaid"
+              class="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded"
+            >
+              Cancel
+            </button>
+          </div>
         </div>
-        <div class="form-group">
-          <label>Credit Duration</label>
-          <input
-            v-model.number="newBiller.creditDuration"
-            type="number"
-            placeholder="Enter Credit Duration (in days)"
-            class="w-full p-2 border rounded mt-1"
-            required
-          />
-        </div>
-        <div class="form-group">
-          <label>Bank Name</label>
-          <input
-            v-model="newBiller.bankName"
-            type="text"
-            placeholder="Enter Bank Name"
-            class="w-full p-2 border rounded mt-1"
-            required
-          />
-        </div>
-        <div class="form-group">
-          <label>Account Number</label>
-          <input
-            v-model="newBiller.accountNo"
-            type="password"
-            placeholder="Enter Account Number"
-            class="w-full p-2 border rounded mt-1 account-no-input"
-            required
-            @paste.prevent
-          />
-        </div>
-        <div class="form-group">
-          <label>Repeat Account Number</label>
-          <input
-            v-model="newBiller.repeatAccountNo"
-            type="text"
-            placeholder="Re-enter Account Number"
-            class="w-full p-2 border rounded mt-1"
-            required
-          />
-        </div>
-        <div class="form-group">
-          <label>IFSC Code</label>
-          <input
-            v-model="newBiller.ifsc"
-            type="text"
-            placeholder="Enter IFSC Code"
-            class="w-full p-2 border rounded mt-1"
-            required
-            @input="fetchBranchName"
-          />
-        </div>
-        <div class="form-group">
-          <label>Branch</label>
-          <input
-            v-model="newBiller.branch"
-            type="text"
-            placeholder="Branch Name"
-            class="w-full p-2 border rounded mt-1"
-            required
-            readonly
-          />
-        </div>
-        <div class="flex justify-end space-x-4">
-          <button
-            @click="saveBiller"
-            class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
-            :disabled="!isBillerValid"
-          >
-            Save
-          </button>
-          <button
-            @click="cancelAddBiller"
-            class="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded"
-          >
-            Cancel
-          </button>
+      </div>
+
+      <!-- Add/Edit Biller Popup -->
+      <div
+        v-if="showAddBillerPopup"
+        class="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center popup"
+      >
+        <div
+          class="bg-white p-6 rounded shadow-lg max-h-[80vh] overflow-y-auto"
+        >
+          <h2 class="text-xl mb-4">
+            {{ editBillerMode ? "Edit Biller" : "Add Biller" }}
+          </h2>
+          <div class="form-group">
+            <label>Name</label>
+            <input
+              v-model="newBiller.name"
+              type="text"
+              class="w-full p-2 border rounded mt-1"
+              required
+            />
+          </div>
+          <div class="form-group">
+            <label>Credit Duration</label>
+            <input
+              v-model.number="newBiller.creditDuration"
+              type="number"
+              class="w-full p-2 border rounded mt-1"
+              required
+            />
+          </div>
+          <div class="form-group">
+            <label>Account Number</label>
+            <input
+              v-model="newBiller.accountNo"
+              type="password"
+              class="w-full p-2 border rounded mt-1 account-no-input"
+              required
+              @paste.prevent
+            />
+          </div>
+          <div class="form-group">
+            <label>Reenter Account Number</label>
+            <input
+              v-model="newBiller.reenterAccountNo"
+              type="text"
+              class="w-full p-2 border rounded mt-1"
+              required
+            />
+          </div>
+          <div class="form-group">
+            <label>IFSC Code</label>
+            <input
+              v-model="newBiller.ifsc"
+              type="text"
+              class="w-full p-2 border rounded mt-1"
+              required
+              @input="fetchBankAndBranch"
+              v-on:keyup="newBiller.ifsc = newBiller.ifsc.toUpperCase()"
+            />
+          </div>
+          <div class="form-group">
+            <label>Bank Name</label>
+            <input
+              v-model="newBiller.bankName"
+              type="text"
+              class="w-full p-2 border rounded mt-1"
+              required
+              readonly
+            />
+          </div>
+          <div class="form-group">
+            <label>Branch</label>
+            <input
+              v-model="newBiller.branch"
+              type="text"
+              class="w-full p-2 border rounded mt-1"
+              required
+              readonly
+            />
+          </div>
+          <div class="flex justify-end space-x-4">
+            <button
+              @click="saveBiller"
+              class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+              :disabled="
+                !isBillerValid ||
+                newBiller.accountNo !== newBiller.reenterAccountNo
+              "
+            >
+              {{ editBillerMode ? "Update" : "Save" }}
+            </button>
+            <button
+              @click="cancelAddBiller"
+              class="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded"
+            >
+              Cancel
+            </button>
+          </div>
         </div>
       </div>
     </div>
@@ -306,15 +366,15 @@ export default {
     const bills = ref([]);
     const billers = ref([]);
     const showAddBillPopup = ref(false);
-    const showDeletePopup = ref(false);
+    const showMarkAsPaidPopup = ref(false);
+    const showShowBillerPopup = ref(false);
     const showAddBillerPopup = ref(false);
     const newBill = ref({
-      id: Date.now(),
-      billerName: "",
-      date: "",
+      biller: "",
       amount: null,
-      dueDuration: null,
-      active: 1,
+      due_date: "",
+      status: "pending",
+      remarks: "",
     });
     const dateFilterStart = ref("");
     const dateFilterEnd = ref("");
@@ -323,77 +383,76 @@ export default {
       creditDuration: null,
       bankName: "",
       accountNo: "",
-      repeatAccountNo: "",
+      reenterAccountNo: "",
       ifsc: "",
       branch: "",
     });
-    const deletePassword = ref("");
+    const markAsPaidPassword = ref("");
     const selectedBill = ref(null);
-    const isEditing = ref(false);
+    const selectedBiller = ref(null);
+    const editBillMode = ref(false);
+    const editBillerMode = ref(false);
     const today = new Date().toISOString().split("T")[0];
 
-    const serverStatus = ref("Offline");
-    const lastRefreshed = ref(new Date().toLocaleString());
+    const webAppUrl =
+      "https://script.google.com/macros/s/AKfycbz8fDlS4UWb4xpcfb01T9L3q8t91xKdFC6-ttdklOyVYXmLBhrB0eP4iD5fjJgQLrzb/exec"; // Your actual Web App URL
 
-    const baseURL =
-      process.env.NODE_ENV === "production"
-        ? "https://smart-due.onrender.com"
-        : "http://localhost:3001";
-
-    const syncWithBackend = async () => {
+    const syncWithGoogleSheets = async () => {
       try {
-        // Send current frontend data to backend to sync on wake-up
-        await Promise.all([
-          fetch(`${baseURL}/bill-data.json`, {
-            method: "PUT",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(bills.value),
-          }),
-          fetch(`${baseURL}/biller-data.json`, {
-            method: "PUT",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(billers.value),
-          }),
-        ]);
-
-        // Fetch fresh data from backend
-        const [billRes, billerRes] = await Promise.all([
-          fetch(`${baseURL}/bill-data.json`),
-          fetch(`${baseURL}/biller-data.json`),
-        ]);
-        if (billRes.ok && billerRes.ok) {
-          bills.value = (await billRes.json()).filter((b) => b.active === 1);
-          billers.value = await billerRes.json();
+        const billResponse = await fetch(
+          "https://opensheet.elk.sh/15McAhzua0NK0vGVObPDp4Npc5SV27v15Ec7gY0LG34I/Billdata"
+        );
+        const billerResponse = await fetch(
+          "https://opensheet.elk.sh/15McAhzua0NK0vGVObPDp4Npc5SV27v15Ec7gY0LG34I/Billerdata"
+        );
+        if (billResponse.ok && billerResponse.ok) {
+          bills.value = await billResponse.json();
+          billers.value = await billerResponse.json();
           localStorage.setItem("billData", JSON.stringify(bills.value));
           localStorage.setItem("billerData", JSON.stringify(billers.value));
-          serverStatus.value = "Online";
-          lastRefreshed.value = new Date().toLocaleString();
-        } else {
-          serverStatus.value = "Offline (Server waking up...)";
         }
       } catch (error) {
-        serverStatus.value = "Offline";
         console.error("Sync error:", error);
-        // Retry after 5 seconds if offline
-        setTimeout(syncWithBackend, 5000);
+      }
+    };
+
+    const saveToGoogleSheets = async (data) => {
+      try {
+        const response = await fetch(webAppUrl, {
+          method: "POST",
+          redirect: "follow",
+          body: JSON.stringify({
+            ...data,
+            secret: "mySuperSecret123",
+            action: data.action || "add",
+          }),
+          headers: {
+            "Content-Type": "text/plain;charset=utf-8",
+          },
+        });
+        if (!response.ok) throw new Error("Network response was not ok");
+        const result = await response.text();
+        console.log("Raw response:", result);
+        const jsonResult = result ? JSON.parse(result) : { success: true };
+        if (jsonResult.success) {
+          await syncWithGoogleSheets();
+        } else {
+          console.error("Save failed:", jsonResult.error);
+        }
+      } catch (error) {
+        console.error("Save error:", error);
       }
     };
 
     onMounted(() => {
-      // Load from localStorage on mount
-      bills.value = JSON.parse(localStorage.getItem("billData") || "[]").filter(
-        (b) => b.active === 1
-      );
+      bills.value = JSON.parse(localStorage.getItem("billData") || "[]");
       billers.value = JSON.parse(localStorage.getItem("billerData") || "[]");
-      syncWithBackend();
-      const interval = setInterval(syncWithBackend, 30000); // Poll every 30 seconds
-      return () => clearInterval(interval);
+      syncWithGoogleSheets();
     });
 
     const filteredBills = computed(() => {
       return bills.value.filter((bill) => {
-        if (!dateFilterStart.value && !dateFilterEnd.value) return true;
-        const billDate = new Date(bill.date);
+        const billDate = new Date(bill.due_date.split("/").reverse().join("-"));
         const startDate = dateFilterStart.value
           ? new Date(dateFilterStart.value)
           : null;
@@ -409,142 +468,145 @@ export default {
       });
     });
 
-    const selectedBillerCreditDuration = computed(() => {
-      const biller = billers.value.find(
-        (b) => b.name === newBill.value.billerName
-      );
-      return biller ? biller.creditDuration : newBill.value.dueDuration || 0;
-    });
-
     const isBillerValid = computed(() => {
       return (
         newBiller.value.name &&
         newBiller.value.creditDuration &&
         newBiller.value.bankName &&
         newBiller.value.accountNo &&
-        newBiller.value.repeatAccountNo &&
+        newBiller.value.reenterAccountNo &&
         newBiller.value.ifsc &&
         newBiller.value.branch &&
-        newBiller.value.accountNo === newBiller.value.repeatAccountNo
+        newBiller.value.accountNo === newBiller.value.reenterAccountNo
       );
     });
 
     const getDueInDays = (bill) => {
-      const biller = billers.value.find((b) => b.name === bill.billerName);
-      const creditDuration = biller ? biller.creditDuration : bill.dueDuration;
-      const billDate = new Date(bill.date);
-      const dueDate = new Date(billDate);
-      dueDate.setDate(billDate.getDate() + creditDuration);
+      const billDate = new Date(bill.due_date.split("/").reverse().join("-"));
       const todayDate = new Date(today);
-      const diffTime = dueDate - todayDate;
+      const diffTime = billDate - todayDate;
       const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
       return diffDays;
-    };
-
-    const getDueOnDate = (bill) => {
-      const biller = billers.value.find((b) => b.name === bill.billerName);
-      const creditDuration = biller ? biller.creditDuration : bill.dueDuration;
-      const billDate = new Date(bill.date);
-      const dueDate = new Date(billDate);
-      dueDate.setDate(billDate.getDate() + creditDuration);
-      return dueDate.toISOString().split("T")[0];
     };
 
     const getStatus = (bill) => {
       const dueInDays = getDueInDays(bill);
       if (dueInDays < 0) return "Overdue";
       if (dueInDays === 0) return "Due";
-      return "No Due";
+      return bill.status === "paid" ? "Paid" : "No Due";
+    };
+
+    const formatIndianCurrency = (amount) => {
+      if (amount === null || amount === undefined) return "₹0.00";
+      const formatter = new Intl.NumberFormat("en-IN", {
+        style: "currency",
+        currency: "INR",
+      });
+      return formatter.format(amount);
+    };
+
+    const formatIndianDate = (dateStr) => {
+      if (!dateStr) return "";
+      const [day, month, year] = dateStr.split("/");
+      return `${day}/${month}/${year}`;
     };
 
     const openAddBillPopup = () => {
       newBill.value = {
-        id: Date.now(),
-        billerName: "",
-        date: today,
+        biller: billers.value.length ? billers.value[0].name : "",
         amount: null,
-        dueDuration: null,
-        active: 1,
+        due_date: today,
+        status: "pending",
+        remarks: "",
       };
-      isEditing.value = false;
+      editBillMode.value = false;
       showAddBillPopup.value = true;
     };
 
-    const openEditBill = (bill) => {
-      newBill.value = { ...bill };
-      isEditing.value = true;
+    const openEditBillPopup = (bill) => {
+      newBill.value = {
+        ...bill,
+        due_date: bill.due_date.split("/").reverse().join("-"),
+      };
+      editBillMode.value = true;
       showAddBillPopup.value = true;
     };
 
-    const openDeletePopup = (bill) => {
-      selectedBill.value = bill;
-      deletePassword.value = "";
-      showDeletePopup.value = true;
+    const openShowBillerPopup = () => {
+      showShowBillerPopup.value = true;
     };
 
-    const saveBill = () => {
-      const billIndex = bills.value.findIndex((b) => b.id === newBill.value.id);
-      if (billIndex > -1) {
-        bills.value[billIndex] = newBill.value;
-      } else {
-        bills.value.push(newBill.value);
-      }
-      localStorage.setItem("billData", JSON.stringify(bills.value));
-      syncWithBackend(); // Sync with backend
+    const openEditBillerPopup = (biller) => {
+      newBiller.value = { ...biller };
+      editBillerMode.value = true;
+      showAddBillerPopup.value = true;
+    };
+
+    const saveBill = async () => {
+      const dueDate = formatIndianDate(newBill.value.due_date);
+      await saveToGoogleSheets({
+        ...newBill.value,
+        due_date: dueDate,
+        action: editBillMode.value ? "addBill" : "addBill",
+      }); // Append for now, update logic needed for edit
       showAddBillPopup.value = false;
     };
 
-    const confirmDelete = () => {
-      if (deletePassword.value === "delete") {
-        selectedBill.value.active = 0;
-        bills.value = bills.value.filter(
-          (b) => b.id !== selectedBill.value.id || b.active === 1
-        );
-        localStorage.setItem("billData", JSON.stringify(bills.value));
-        syncWithBackend(); // Sync with backend
-        showDeletePopup.value = false;
+    const confirmMarkAsPaid = async () => {
+      if (
+        markAsPaidPassword.value === "aparna" ||
+        markAsPaidPassword.value === "slnp"
+      ) {
+        await saveToGoogleSheets({
+          ...selectedBill.value,
+          action: "markAsPaid",
+        });
+        showMarkAsPaidPopup.value = false;
       }
     };
 
     const cancelAddBill = () => (showAddBillPopup.value = false);
-    const cancelDelete = () => (showDeletePopup.value = false);
+    const cancelMarkAsPaid = () => (showMarkAsPaidPopup.value = false);
+    const cancelShowBiller = () => (showShowBillerPopup.value = false);
+    const cancelAddBiller = () => (showAddBillerPopup.value = false);
+
     const openAddBillerPopup = () => {
       newBiller.value = {
         name: "",
         creditDuration: null,
         bankName: "",
         accountNo: "",
-        repeatAccountNo: "",
+        reenterAccountNo: "",
         ifsc: "",
         branch: "",
       };
+      editBillerMode.value = false;
       showAddBillerPopup.value = true;
     };
 
-    const saveBiller = () => {
+    const saveBiller = async () => {
       if (isBillerValid.value) {
-        billers.value.push({ ...newBiller.value });
-        localStorage.setItem("billerData", JSON.stringify(billers.value));
-        syncWithBackend(); // Sync with backend
+        await saveToGoogleSheets({ ...newBiller.value, action: "addBiller" });
         showAddBillerPopup.value = false;
       }
     };
 
-    const cancelAddBiller = () => (showAddBillerPopup.value = false);
-
-    const fetchBranchName = async () => {
+    const fetchBankAndBranch = async () => {
       const ifsc = newBiller.value.ifsc.toUpperCase();
       if (ifsc.length === 11) {
         try {
           const response = await fetch(`https://ifsc.razorpay.com/${ifsc}`);
           if (response.ok) {
             const data = await response.json();
+            newBiller.value.bankName = data.BANK || "Bank not found";
             newBiller.value.branch = data.BRANCH || "Branch not found";
           } else {
+            newBiller.value.bankName = "Invalid IFSC or Bank not found";
             newBiller.value.branch = "Invalid IFSC or Branch not found";
           }
         } catch (error) {
-          console.error("Error fetching branch:", error);
+          console.error("Error fetching bank and branch:", error);
+          newBiller.value.bankName = "Error fetching bank";
           newBiller.value.branch = "Error fetching branch";
         }
       }
@@ -554,35 +616,38 @@ export default {
       bills,
       billers,
       showAddBillPopup,
-      showDeletePopup,
+      showMarkAsPaidPopup,
+      showShowBillerPopup,
       showAddBillerPopup,
       newBill,
       newBiller,
-      deletePassword,
+      markAsPaidPassword,
       selectedBill,
+      selectedBiller,
+      editBillMode,
+      editBillerMode,
       today,
-      isEditing,
       filteredBills,
-      selectedBillerCreditDuration,
       isBillerValid,
       getDueInDays,
-      getDueOnDate,
       getStatus,
+      formatIndianCurrency,
+      formatIndianDate,
       openAddBillPopup,
-      openEditBill,
-      openDeletePopup,
+      openEditBillPopup,
+      openShowBillerPopup,
+      openEditBillerPopup,
       saveBill,
-      confirmDelete,
+      confirmMarkAsPaid,
       cancelAddBill,
-      cancelDelete,
+      cancelMarkAsPaid,
+      cancelShowBiller,
+      cancelAddBiller,
       openAddBillerPopup,
       saveBiller,
-      cancelAddBiller,
       dateFilterStart,
       dateFilterEnd,
-      serverStatus,
-      lastRefreshed,
-      fetchBranchName,
+      fetchBankAndBranch,
     };
   },
 };
@@ -590,4 +655,10 @@ export default {
 
 <style scoped>
 @import "./styles.css";
+.form-group {
+  margin-bottom: 1rem;
+}
+.account-no-input {
+  -webkit-text-security: disc;
+}
 </style>
