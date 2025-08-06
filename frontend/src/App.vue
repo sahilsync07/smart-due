@@ -3,19 +3,16 @@
     <header
       class="bg-purple-600 text-white p-4 flex justify-between items-center"
     >
-      <h1 class="text-2xl font-bold">Smart Due</h1>
-      <div class="text-right">
-        <span
-          class="text-xl font-bold"
-          style="letter-spacing: -1px; color: #6366f1"
+      <div class="header-content">
+        <h1 class="text-2xl font-bold">Smart Due</h1>
+        <span class="text-xl font-bold sbe-text"
+          >Sri Brundabana Enterprises</span
         >
-          Sri Brundabana Enterprises
-        </span>
       </div>
     </header>
     <div class="container mx-auto p-4">
-      <div class="flex justify-between items-center mb-2">
-        <div class="flex space-x-4">
+      <div class="controls-container">
+        <div class="button-group">
           <button
             @click="openAddBillPopup"
             class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
@@ -35,19 +32,19 @@
             Add Biller
           </button>
         </div>
-        <div class="flex items-center space-x-2">
+        <div class="date-filter-group">
           <input
             type="date"
             v-model="dateFilterStart"
-            class="p-2 rounded border"
-            placeholder="Start Date"
+            class="p-2 rounded border date-input"
+            placeholder="From Date"
           />
           <span class="text-gray-600 px-2">to</span>
           <input
             type="date"
             v-model="dateFilterEnd"
-            class="p-2 rounded border"
-            placeholder="End Date"
+            class="p-2 rounded border date-input"
+            placeholder="To Date"
           />
         </div>
       </div>
@@ -90,25 +87,27 @@
               >
                 {{ getStatus(bill) }}
               </td>
-              <td class="py-3 px-6 flex space-x-2">
-                <button
-                  @click="openEditBillPopup(bill)"
-                  class="bg-teal-500 hover:bg-teal-700 text-white font-bold py-1 px-2 rounded"
-                >
-                  Edit Bill
-                </button>
-                <button
-                  @click="openMarkAsPaidPopup(bill)"
-                  class="bg-yellow-500 hover:bg-yellow-700 text-white font-bold py-1 px-2 rounded"
-                >
-                  Mark as Paid
-                </button>
-                <button
-                  @click="openBankDetailsPopup(bill)"
-                  class="bg-purple-500 hover:bg-purple-700 text-white font-bold py-1 px-2 rounded"
-                >
-                  Show Bank Details
-                </button>
+              <td class="py-3 px-6 action-cell">
+                <div class="action-buttons">
+                  <button
+                    @click="openEditBillPopup(bill)"
+                    class="action-button bg-teal-500 hover:bg-teal-700 text-white font-bold py-1 px-2 rounded"
+                  >
+                    Edit Bill
+                  </button>
+                  <button
+                    @click="openMarkAsPaidPopup(bill)"
+                    class="action-button bg-yellow-500 hover:bg-yellow-700 text-white font-bold py-1 px-2 rounded"
+                  >
+                    Mark Paid
+                  </button>
+                  <button
+                    @click="openBankDetailsPopup(bill)"
+                    class="action-button bg-purple-500 hover:bg-purple-700 text-white font-bold py-1 px-2 rounded"
+                  >
+                    Bank Details
+                  </button>
+                </div>
               </td>
             </tr>
           </tbody>
@@ -202,7 +201,8 @@
             <input
               v-model="newBill.billing_date"
               type="date"
-              class="w-full p-2 border rounded mt-1"
+              class="w-full p-2 border rounded mt-1 date-input"
+              placeholder="Billing Date"
               required
             />
           </div>
@@ -220,7 +220,8 @@
             <input
               v-model="newBill.due_date"
               type="date"
-              class="w-full p-2 border rounded mt-1"
+              class="w-full p-2 border rounded mt-1 date-input"
+              placeholder="Due Date"
               required
             />
           </div>
@@ -281,113 +282,117 @@
 
       <!-- Show Bank Details Popup -->
       <div
-        v-if="showBankDetailsPopup"
+        v-if="showBankDetailsPopup && selectedBill && selectedBiller"
         class="fixed inset-0 bg-gray-600 bg-opacity-75 flex items-center justify-center popup"
       >
         <div class="bg-white p-6 rounded shadow-lg w-full max-w-[600px]">
           <h2 class="text-xl mb-4">
             Bank Details for {{ selectedBill.biller }}
           </h2>
-          <div
-            class="form-group"
-            v-for="biller in billers"
-            v-if="biller.name === selectedBill.biller"
-          >
-            <div class="flex items-center">
-              <label class="w-32">Bank Name:</label>
-              <span class="flex-1 ml-2">{{ biller.bankName }}</span>
-              <button
-                @click="copyToClipboard(biller.bankName)"
-                class="bg-gray-300 hover:bg-gray-400 text-black font-bold py-1 px-2 rounded flex items-center"
-              >
-                <svg
-                  class="w-4 h-4 mr-1"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                  xmlns="http://www.w3.org/2000/svg"
+          <div class="bank-details">
+            <div class="form-group">
+              <label class="block font-medium">Bank Name</label>
+              <div class="flex items-center mt-1">
+                <span class="flex-1">{{ selectedBiller.bankName }}</span>
+                <button
+                  @click="copyToClipboard(selectedBiller.bankName)"
+                  class="bg-gray-300 hover:bg-gray-400 text-black font-bold py-1 px-2 rounded flex items-center ml-2"
                 >
-                  <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    stroke-width="2"
-                    d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"
-                  ></path>
-                </svg>
-                Copy
-              </button>
+                  <svg
+                    class="w-4 h-4 mr-1"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"
+                    ></path>
+                  </svg>
+                  Copy
+                </button>
+              </div>
             </div>
-            <div class="flex items-center">
-              <label class="w-32">Account No:</label>
-              <span class="flex-1 ml-2">{{ biller.accountNo }}</span>
-              <button
-                @click="copyToClipboard(biller.accountNo)"
-                class="bg-gray-300 hover:bg-gray-400 text-black font-bold py-1 px-2 rounded flex items-center"
-              >
-                <svg
-                  class="w-4 h-4 mr-1"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                  xmlns="http://www.w3.org/2000/svg"
+            <div class="form-group">
+              <label class="block font-medium">Account No</label>
+              <div class="flex items-center mt-1">
+                <span class="flex-1">{{ selectedBiller.accountNo }}</span>
+                <button
+                  @click="copyToClipboard(selectedBiller.accountNo)"
+                  class="bg-gray-300 hover:bg-gray-400 text-black font-bold py-1 px-2 rounded flex items-center ml-2"
                 >
-                  <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    stroke-width="2"
-                    d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"
-                  ></path>
-                </svg>
-                Copy
-              </button>
+                  <svg
+                    class="w-4 h-4 mr-1"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"
+                    ></path>
+                  </svg>
+                  Copy
+                </button>
+              </div>
             </div>
-            <div class="flex items-center">
-              <label class="w-32">IFSC:</label>
-              <span class="flex-1 ml-2">{{ biller.ifsc }}</span>
-              <button
-                @click="copyToClipboard(biller.ifsc)"
-                class="bg-gray-300 hover:bg-gray-400 text-black font-bold py-1 px-2 rounded flex items-center"
-              >
-                <svg
-                  class="w-4 h-4 mr-1"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                  xmlns="http://www.w3.org/2000/svg"
+            <div class="form-group">
+              <label class="block font-medium">IFSC</label>
+              <div class="flex items-center mt-1">
+                <span class="flex-1">{{ selectedBiller.ifsc }}</span>
+                <button
+                  @click="copyToClipboard(selectedBiller.ifsc)"
+                  class="bg-gray-300 hover:bg-gray-400 text-black font-bold py-1 px-2 rounded flex items-center ml-2"
                 >
-                  <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    stroke-width="2"
-                    d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"
-                  ></path>
-                </svg>
-                Copy
-              </button>
+                  <svg
+                    class="w-4 h-4 mr-1"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"
+                    ></path>
+                  </svg>
+                  Copy
+                </button>
+              </div>
             </div>
-            <div class="flex items-center">
-              <label class="w-32">Branch:</label>
-              <span class="flex-1 ml-2">{{ biller.branch }}</span>
-              <button
-                @click="copyToClipboard(biller.branch)"
-                class="bg-gray-300 hover:bg-gray-400 text-black font-bold py-1 px-2 rounded flex items-center"
-              >
-                <svg
-                  class="w-4 h-4 mr-1"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                  xmlns="http://www.w3.org/2000/svg"
+            <div class="form-group">
+              <label class="block font-medium">Branch</label>
+              <div class="flex items-center mt-1">
+                <span class="flex-1">{{ selectedBiller.branch }}</span>
+                <button
+                  @click="copyToClipboard(selectedBiller.branch)"
+                  class="bg-gray-300 hover:bg-gray-400 text-black font-bold py-1 px-2 rounded flex items-center ml-2"
                 >
-                  <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    stroke-width="2"
-                    d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"
-                  ></path>
-                </svg>
-                Copy
-              </button>
+                  <svg
+                    class="w-4 h-4 mr-1"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"
+                    ></path>
+                  </svg>
+                  Copy
+                </button>
+              </div>
             </div>
           </div>
           <div class="flex justify-end mt-4">
@@ -620,7 +625,7 @@ export default {
         newBiller.value.reenterAccountNo &&
         newBiller.value.ifsc &&
         newBiller.value.branch &&
-        newBiller.value.accountNo === newBiller.reenterAccountNo
+        newBiller.value.accountNo === newBiller.value.reenterAccountNo
       );
     });
 
@@ -705,7 +710,9 @@ export default {
 
     const openBankDetailsPopup = (bill) => {
       selectedBill.value = bill;
-      showBankDetailsPopup.value = true;
+      const biller = billers.value.find((b) => b.name === bill.biller);
+      selectedBiller.value = biller || null;
+      showBankDetailsPopup.value = !!biller;
     };
 
     const copyToClipboard = (text) => {
@@ -749,7 +756,11 @@ export default {
     const cancelMarkAsPaid = () => (showMarkAsPaidPopup.value = false);
     const cancelShowBiller = () => (showShowBillerPopup.value = false);
     const cancelAddBiller = () => (showAddBillerPopup.value = false);
-    const cancelBankDetails = () => (showBankDetailsPopup.value = false);
+    const cancelBankDetails = () => {
+      showBankDetailsPopup.value = false;
+      selectedBill.value = null;
+      selectedBiller.value = null;
+    };
 
     const openAddBillerPopup = () => {
       newBiller.value = {
@@ -830,6 +841,7 @@ export default {
       cancelMarkAsPaid,
       cancelShowBiller,
       cancelAddBiller,
+      cancelBankDetails,
       openAddBillerPopup,
       saveBiller,
       dateFilterStart,

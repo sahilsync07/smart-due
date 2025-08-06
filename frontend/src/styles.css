@@ -89,7 +89,14 @@ header {
     transition: box-shadow 0.25s;
 }
 
-header .text-right span {
+.header-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+}
+
+.sbe-text {
     font-weight: 700;
     font-size: 1.32rem;
     letter-spacing: -1px;
@@ -102,7 +109,6 @@ h1 {
     font-size: 1.32rem;
     letter-spacing: -1px;
     color: var(--primary);
-    flex: 1;
 }
 
 button {
@@ -147,6 +153,12 @@ select {
     appearance: none;
     -webkit-appearance: none;
     -moz-appearance: none;
+    font-family: 'Inter', 'Poppins', Arial, sans-serif;
+}
+
+input[type="date"]::placeholder {
+    color: var(--text-subtle);
+    font-family: 'Inter', 'Poppins', Arial, sans-serif;
 }
 
 input[type="date"]:focus,
@@ -186,7 +198,6 @@ select option {
 .table-responsive {
     width: 100%;
     overflow-x: hidden;
-    /* Remove horizontal scrollbar */
 }
 
 table {
@@ -237,14 +248,26 @@ tr:hover td {
     animation: fadeIn 0.33s cubic-bezier(0.44, 0, 0.63, 1);
 }
 
-.container .flex {
+.controls-container {
+    margin-bottom: 1rem;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 0;
 }
 
-.container .flex .space-x-2 span {
+.button-group {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+}
+
+.date-filter-group {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.date-filter-group span {
     padding: 0 0.5rem;
 }
 
@@ -274,29 +297,43 @@ tr:hover td {
 }
 
 .popup .form-group {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
     margin-bottom: 1rem;
 }
 
 .popup .form-group label {
-    flex: 0 0 120px;
     font-size: 1rem;
     font-weight: 500;
     color: var(--text-main);
+    display: block;
 }
 
 .popup .form-group .flex {
-    flex: 1;
     display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.bank-details .form-group {
+    margin-bottom: 1.5rem;
+}
+
+.action-cell {
+    display: flex;
+    justify-content: flex-start;
     align-items: center;
 }
 
-.popup .form-group input,
-.popup .form-group select {
+.action-buttons {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.action-button {
     flex: 1;
-    margin: 0;
+    min-width: 100px;
+    text-align: center;
+    padding: 0.5rem 1rem;
+    white-space: nowrap;
 }
 
 .text-blue-500 {
@@ -338,46 +375,99 @@ tr:hover td {
 }
 
 @media (max-width: 900px) {
-
-    table,
-    thead,
-    tbody,
-    th,
-    td,
-    tr {
-        font-size: 0.96rem;
+    header {
+        padding: 1rem;
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
     }
 
-    .container {
+    .header-content {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    .sbe-text {
+        font-size: 1.2rem;
+    }
+
+    h1 {
+        font-size: 1.5rem;
+    }
+
+    .controls-container {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    .button-group {
+        flex-direction: row;
+        justify-content: space-between;
+        gap: 0.5rem;
+    }
+
+    .button-group button {
+        flex: 1;
         padding: 0.5rem;
+        font-size: 0.9rem;
+        margin-right: 0;
+    }
+
+    .date-filter-group {
+        flex-direction: row;
+        justify-content: space-between;
+        gap: 0.5rem;
+    }
+
+    .date-filter-group input {
+        flex: 1;
+        font-size: 0.9rem;
+    }
+
+    .date-filter-group span {
+        font-size: 0.9rem;
+    }
+
+    .table-responsive {
+        overflow-x: hidden;
+    }
+
+    table {
+        width: 100%;
+        font-size: 0.8rem;
     }
 
     th,
     td {
-        padding: 0.65rem 0.5rem;
+        padding: 0.5rem 0.3rem;
+        font-size: 0.8rem;
     }
 
-    header {
+    .action-cell {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .action-buttons {
         flex-direction: column;
-        padding: 0.5rem 1rem;
-    }
-
-    header .text-right {
-        text-align: right;
-        margin-top: 0.5rem;
-    }
-
-    .container .flex {
-        flex-direction: column;
-        gap: 1rem;
-    }
-
-    .container .flex div {
+        align-items: center;
+        gap: 0.3rem;
         width: 100%;
     }
 
-    .container input[type="date"] {
+    .action-button {
         width: 100%;
+        max-width: 120px;
+        min-width: 0;
+        padding: 0.4rem;
+        font-size: 0.8rem;
+        margin: 0 auto;
+    }
+
+    .container {
+        padding: 0.5rem;
     }
 
     .popup>div {
@@ -404,6 +494,10 @@ tr:hover td {
     .popup .form-group input,
     .popup .form-group select {
         width: 100%;
+    }
+
+    .bank-details .form-group {
+        margin-bottom: 1.5rem;
     }
 }
 
