@@ -59,20 +59,28 @@
             Add Biller
           </button>
         </div>
-        <div class="date-filter-group" v-if="currentView === 'smartDue'">
+        <div class="filter-group" v-if="currentView === 'smartDue'">
           <input
-            type="date"
-            v-model="dateFilterStart"
-            class="p-2 rounded border date-input"
-            placeholder="From Date"
+            v-model="searchQuery"
+            type="text"
+            placeholder="Search by biller, executive, or amount"
+            class="w-64 p-2 rounded border mr-4"
           />
-          <span class="text-gray-600 px-2">to</span>
-          <input
-            type="date"
-            v-model="dateFilterEnd"
-            class="p-2 rounded border date-input"
-            placeholder="To Date"
-          />
+          <div class="date-filter-group">
+            <input
+              type="date"
+              v-model="dateFilterStart"
+              class="p-2 rounded border date-input"
+              placeholder="From Date"
+            />
+            <span class="text-gray-600 px-2">to</span>
+            <input
+              type="date"
+              v-model="dateFilterEnd"
+              class="p-2 rounded border date-input"
+              placeholder="To Date"
+            />
+          </div>
         </div>
       </div>
 
@@ -84,9 +92,33 @@
               class="bg-gray-200 text-gray-600 uppercase text-sm leading-normal"
             >
               <th class="py-3 px-6 text-left biller">Biller</th>
-              <th class="py-3 px-6 text-left">Billing Date</th>
-              <th class="py-3 px-6 text-left">Amount</th>
-              <th class="py-3 px-6 text-left">Due Date</th>
+              <th
+                class="py-3 px-6 text-left cursor-pointer"
+                @click="toggleSort('billing_date')"
+              >
+                Billing Date
+                <span v-if="sortField === 'billing_date'">
+                  {{ sortDirection === "asc" ? "↑" : "↓" }}
+                </span>
+              </th>
+              <th
+                class="py-3 px-6 text-left cursor-pointer"
+                @click="toggleSort('amount')"
+              >
+                Amount
+                <span v-if="sortField === 'amount'">
+                  {{ sortDirection === "asc" ? "↑" : "↓" }}
+                </span>
+              </th>
+              <th
+                class="py-3 px-6 text-left cursor-pointer"
+                @click="toggleSort('due_date')"
+              >
+                Due Date
+                <span v-if="sortField === 'due_date'">
+                  {{ sortDirection === "asc" ? "↑" : "↓" }}
+                </span>
+              </th>
               <th class="py-3 px-6 text-left">Due In</th>
               <th class="py-3 px-6 text-left">Status</th>
               <th class="py-3 px-6 text-left">Executive</th>
@@ -96,7 +128,7 @@
           <tbody>
             <tr
               v-for="bill in sortedBills"
-              :key="bill.biller + bill.due_date"
+              :key="bill.biller + bill.billing_date + bill.amount"
               class="border-b hover:bg-gray-100"
             >
               <td class="py-3 px-6 biller">{{ bill.biller }}</td>
@@ -768,6 +800,9 @@ export default {
     const editBillMode = ref(false);
     const editBillerMode = ref(false);
     const loading = ref(false);
+    const sortField = ref("billing_date");
+    const sortDirection = ref("asc");
+    const searchQuery = ref("");
     const today = new Date().toLocaleDateString("en-GB").split("/").join("/");
 
     const webAppUrl =
@@ -788,7 +823,6 @@ export default {
           bills.value = await billResponse.json();
           billers.value = await billerResponse.json();
           orders.value = await orderResponse.json();
-          console.log("Fetched orders:", orders.value);
           localStorage.setItem("billData", JSON.stringify(bills.value));
           localStorage.setItem("billerData", JSON.stringify(billers.value));
           localStorage.setItem("orderData", JSON.stringify(orders.value));
@@ -821,7 +855,6 @@ export default {
         });
         if (!response.ok) throw new Error("Network response was not ok");
         const result = await response.text();
-        console.log("Save response:", result);
         const jsonResult = result ? JSON.parse(result) : { success: true };
         if (jsonResult.success) {
           await syncWithGoogleSheets();
@@ -841,37 +874,63 @@ export default {
       bills.value = JSON.parse(localStorage.getItem("billData") || "[]");
       billers.value = JSON.parse(localStorage.getItem("billerData") || "[]");
       orders.value = JSON.parse(localStorage.getItem("orderData") || "[]");
-      console.log("Initial orders from localStorage:", orders.value);
       syncWithGoogleSheets();
     });
 
     const sortedBills = computed(() => {
-      return [...bills.value]
-        .sort((a, b) => {
-          const dateA = parseIndianDate(a.billing_date);
-          const dateB = parseIndianDate(b.billing_date);
-          return dateA - dateB;
-        })
-        .filter((bill) => {
-          const billDate = parseIndianDate(bill.due_date);
-          const startDate = dateFilterStart.value
-            ? parseIndianDate(convertToIndianDate(dateFilterStart.value))
-            : null;
-          const endDate = dateFilterEnd.value
-            ? parseIndianDate(convertToIndianDate(dateFilterEnd.value))
-            : null;
-          if (startDate && endDate)
-            return billDate >= startDate && billDate <= endDate;
-          if (startDate) return billDate >= startDate;
-          if (endDate) return billDate <= endDate;
-          return true;
+      let filteredBills = [...bills.value]; // Create a new array to avoid mutating original
+
+      // Apply search filter
+      if (searchQuery.value) {
+        const query = searchQuery.value.toLowerCase();
+        filteredBills = filteredBills.filter((bill) => {
+          const biller = bill.biller ? bill.biller.toLowerCase() : "";
+          const executive = bill.executive ? bill.executive.toLowerCase() : "";
+          const amount = bill.amount ? bill.amount.toString() : "";
+          return (
+            biller.includes(query) ||
+            executive.includes(query) ||
+            amount.includes(query)
+          );
         });
+      }
+
+      // Apply date range filter
+      filteredBills = filteredBills.filter((bill) => {
+        const billDate = parseIndianDate(bill.due_date || "01/01/1970");
+        const startDate = dateFilterStart.value
+          ? parseIndianDate(convertToIndianDate(dateFilterStart.value))
+          : null;
+        const endDate = dateFilterEnd.value
+          ? parseIndianDate(convertToIndianDate(dateFilterEnd.value))
+          : null;
+        if (startDate && endDate)
+          return billDate >= startDate && billDate <= endDate;
+        if (startDate) return billDate >= startDate;
+        if (endDate) return billDate <= endDate;
+        return true;
+      });
+
+      // Apply sorting
+      return filteredBills.sort((a, b) => {
+        let valueA, valueB;
+        if (sortField.value === "amount") {
+          valueA = Number(a.amount) || 0;
+          valueB = Number(b.amount) || 0;
+        } else {
+          valueA = parseIndianDate(a[sortField.value] || "01/01/1970");
+          valueB = parseIndianDate(b[sortField.value] || "01/01/1970");
+        }
+        return sortDirection.value === "asc"
+          ? valueA - valueB
+          : valueB - valueA;
+      });
     });
 
     const sortedOrders = computed(() => {
       return [...orders.value].sort((a, b) => {
-        const dateA = parseIndianDate(a.order_placed_on);
-        const dateB = parseIndianDate(b.order_placed_on);
+        const dateA = parseIndianDate(a.order_placed_on || "01/01/1970");
+        const dateB = parseIndianDate(b.order_placed_on || "01/01/1970");
         return dateA - dateB;
       });
     });
@@ -910,21 +969,23 @@ export default {
       if (view !== "smartDue") {
         dateFilterStart.value = "";
         dateFilterEnd.value = "";
+        searchQuery.value = "";
+        sortField.value = "billing_date";
+        sortDirection.value = "asc";
       }
     };
 
     const parseIndianDate = (dateStr) => {
-      if (!dateStr) return new Date(0);
+      if (!dateStr || dateStr === "") return new Date(0);
       const [day, month, year] = dateStr.split("/");
       return new Date(`${year}-${month}-${day}`);
     };
 
     const getDueInDays = (bill) => {
-      const billDate = parseIndianDate(bill.due_date);
+      const billDate = parseIndianDate(bill.due_date || "01/01/1970");
       const todayDate = parseIndianDate(today);
       const diffTime = billDate - todayDate;
-      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-      return diffDays;
+      return Math.ceil(diffTime / (1000 * 60 * 60 * 24));
     };
 
     const getStatus = (bill) => {
@@ -994,6 +1055,15 @@ export default {
         (b) => b.name === newOrder.value.biller
       );
       newOrder.value.executive = selectedBiller ? selectedBiller.executive : "";
+    };
+
+    const toggleSort = (field) => {
+      if (sortField.value === field) {
+        sortDirection.value = sortDirection.value === "asc" ? "desc" : "asc";
+      } else {
+        sortField.value = field;
+        sortDirection.value = "asc";
+      }
     };
 
     const openAddBillPopup = () => {
@@ -1180,6 +1250,9 @@ export default {
       editBillMode,
       editBillerMode,
       loading,
+      sortField,
+      sortDirection,
+      searchQuery,
       today,
       sortedBills,
       sortedOrders,
@@ -1214,6 +1287,7 @@ export default {
       setDefaultExecutive,
       setDefaultOrderExecutive,
       calculateDueDate,
+      toggleSort,
     };
   },
 };
@@ -1260,5 +1334,14 @@ export default {
   100% {
     transform: rotate(360deg);
   }
+}
+.filter-group {
+  display: flex;
+  align-items: center;
+  margin-top: 1rem;
+}
+.date-filter-group {
+  display: flex;
+  align-items: center;
 }
 </style>
