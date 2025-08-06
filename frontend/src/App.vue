@@ -14,16 +14,43 @@
       <div class="controls-container">
         <div class="button-group">
           <button
+            @click="setView('smartDue')"
+            :class="[
+              'bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded',
+              { 'bg-blue-700': currentView === 'smartDue' },
+            ]"
+          >
+            Smart Due
+          </button>
+          <button
             @click="openAddBillPopup"
             class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
           >
             Add Bill
           </button>
           <button
-            @click="openShowBillerPopup"
-            class="bg-indigo-500 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded"
+            @click="setView('ordersPlaced')"
+            :class="[
+              'orders-placed-button font-bold py-2 px-4 rounded',
+              { 'orders-placed-button-active': currentView === 'ordersPlaced' },
+            ]"
           >
-            Show Biller
+            Orders Placed
+          </button>
+          <button
+            @click="openAddOrderPopup"
+            class="new-order-button font-bold py-2 px-4 rounded"
+          >
+            New Order
+          </button>
+          <button
+            @click="setView('showBillers')"
+            :class="[
+              'bg-indigo-500 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded',
+              { 'bg-indigo-700': currentView === 'showBillers' },
+            ]"
+          >
+            Show Billers
           </button>
           <button
             @click="openAddBillerPopup"
@@ -32,7 +59,7 @@
             Add Biller
           </button>
         </div>
-        <div class="date-filter-group">
+        <div class="date-filter-group" v-if="currentView === 'smartDue'">
           <input
             type="date"
             v-model="dateFilterStart"
@@ -48,7 +75,9 @@
           />
         </div>
       </div>
-      <div class="table-responsive">
+
+      <!-- Smart Due View (Due Table) -->
+      <div class="table-responsive" v-if="currentView === 'smartDue'">
         <table class="min-w-full bg-white shadow-md rounded">
           <thead>
             <tr
@@ -114,61 +143,98 @@
         </table>
       </div>
 
-      <!-- Show Biller Popup -->
-      <div
-        v-if="showShowBillerPopup"
-        class="fixed inset-0 bg-gray-600 bg-opacity-75 flex items-center justify-center popup"
-      >
-        <div class="bg-white p-6 rounded shadow-lg max-h-[80vh] w-full">
-          <h2 class="text-xl mb-4">Biller List</h2>
-          <div class="table-responsive">
-            <table class="w-full bg-white shadow-md rounded">
-              <thead>
-                <tr
-                  class="bg-gray-200 text-gray-600 uppercase text-sm leading-normal"
-                >
-                  <th class="py-3 px-6 text-left">Name</th>
-                  <th class="py-3 px-6 text-left">Credit Duration</th>
-                  <th class="py-3 px-6 text-left">Account No</th>
-                  <th class="py-3 px-6 text-left">IFSC</th>
-                  <th class="py-3 px-6 text-left">Bank Name</th>
-                  <th class="py-3 px-6 text-left">Branch</th>
-                  <th class="py-3 px-6 text-left">Action</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr
-                  v-for="biller in billers"
-                  :key="biller.name"
-                  class="border-b hover:bg-gray-100"
-                >
-                  <td class="py-3 px-6">{{ biller.name }}</td>
-                  <td class="py-3 px-6">{{ biller.creditDuration }}</td>
-                  <td class="py-3 px-6">{{ biller.accountNo }}</td>
-                  <td class="py-3 px-6">{{ biller.ifsc }}</td>
-                  <td class="py-3 px-6">{{ biller.bankName }}</td>
-                  <td class="py-3 px-6">{{ biller.branch }}</td>
-                  <td class="py-3 px-6">
-                    <button
-                      @click="openEditBillerPopup(biller)"
-                      class="bg-teal-500 hover:bg-teal-700 text-white font-bold py-1 px-2 rounded"
-                    >
-                      Edit Biller
-                    </button>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-          <div class="flex justify-end mt-4">
-            <button
-              @click="cancelShowBiller"
-              class="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded"
+      <!-- Orders Placed View -->
+      <div class="table-responsive" v-if="currentView === 'ordersPlaced'">
+        <table class="min-w-full bg-white shadow-md rounded">
+          <thead>
+            <tr
+              class="bg-gray-200 text-gray-600 uppercase text-sm leading-normal"
             >
-              Close
-            </button>
-          </div>
-        </div>
+              <th class="py-3 px-6 text-left biller">Biller</th>
+              <th class="py-3 px-6 text-left">Order Placed On</th>
+              <th class="py-3 px-6 text-left">Order Items</th>
+              <th class="py-3 px-6 text-left">Transport</th>
+              <th class="py-3 px-6 text-left">Drive Link</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr
+              v-for="(order, index) in orders"
+              :key="index"
+              class="border-b hover:bg-gray-100"
+            >
+              <td class="py-3 px-6 biller">{{ order.biller }}</td>
+              <td class="py-3 px-6">
+                {{ formatIndianDate(order.order_placed_on) }}
+              </td>
+              <td class="py-3 px-6">{{ order.order_items }}</td>
+              <td class="py-3 px-6">{{ order.transport }}</td>
+              <td class="py-3 px-6">
+                <button
+                  @click="copyToClipboard(order.drive_link)"
+                  class="copy-button bg-gray-300 hover:bg-gray-400 text-black font-bold py-1 px-2 rounded flex items-center"
+                >
+                  <svg
+                    class="w-4 h-4 mr-1"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"
+                    ></path>
+                  </svg>
+                  Copy Link
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Show Billers View -->
+      <div class="table-responsive" v-if="currentView === 'showBillers'">
+        <table class="min-w-full bg-white shadow-md rounded">
+          <thead>
+            <tr
+              class="bg-gray-200 text-gray-600 uppercase text-sm leading-normal"
+            >
+              <th class="py-3 px-6 text-left">Name</th>
+              <th class="py-3 px-6 text-left">Credit Duration</th>
+              <th class="py-3 px-6 text-left">Account No</th>
+              <th class="py-3 px-6 text-left">IFSC</th>
+              <th class="py-3 px-6 text-left">Bank Name</th>
+              <th class="py-3 px-6 text-left">Branch</th>
+              <th class="py-3 px-6 text-left">Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr
+              v-for="biller in billers"
+              :key="biller.name"
+              class="border-b hover:bg-gray-100"
+            >
+              <td class="py-3 px-6">{{ biller.name }}</td>
+              <td class="py-3 px-6">{{ biller.creditDuration }}</td>
+              <td class="py-3 px-6">{{ biller.accountNo }}</td>
+              <td class="py-3 px-6">{{ biller.ifsc }}</td>
+              <td class="py-3 px-6">{{ biller.bankName }}</td>
+              <td class="py-3 px-6">{{ biller.branch }}</td>
+              <td class="py-3 px-6">
+                <button
+                  @click="openEditBillerPopup(biller)"
+                  class="bg-teal-500 hover:bg-teal-700 text-white font-bold py-1 px-2 rounded"
+                >
+                  Edit Biller
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
       </div>
 
       <!-- Add/Edit Bill Popup -->
@@ -242,6 +308,83 @@
             </button>
             <button
               @click="cancelAddBill"
+              class="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded"
+            >
+              Cancel
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- New Order Popup -->
+      <div
+        v-if="showAddOrderPopup"
+        class="fixed inset-0 bg-gray-600 bg-opacity-75 flex items-center justify-center popup"
+      >
+        <div class="bg-white p-6 rounded shadow-lg w-full max-w-[600px]">
+          <h2 class="text-xl mb-4">New Order</h2>
+          <div class="form-group">
+            <label>Biller</label>
+            <select
+              v-model="newOrder.biller"
+              class="w-full p-2 border rounded mt-1"
+              required
+            >
+              <option
+                v-for="biller in billers"
+                :key="biller.name"
+                :value="biller.name"
+              >
+                {{ biller.name }}
+              </option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Order Placed On</label>
+            <input
+              v-model="newOrder.order_placed_on"
+              type="date"
+              class="w-full p-2 border rounded mt-1 date-input"
+              placeholder="Order Placed On"
+              required
+            />
+          </div>
+          <div class="form-group">
+            <label>Order Items</label>
+            <input
+              v-model="newOrder.order_items"
+              type="text"
+              class="w-full p-2 border rounded mt-1"
+              required
+            />
+          </div>
+          <div class="form-group">
+            <label>Transport</label>
+            <input
+              v-model="newOrder.transport"
+              type="text"
+              class="w-full p-2 border rounded mt-1"
+              required
+            />
+          </div>
+          <div class="form-group">
+            <label>Drive Link</label>
+            <input
+              v-model="newOrder.drive_link"
+              type="text"
+              class="w-full p-2 border rounded mt-1"
+              required
+            />
+          </div>
+          <div class="flex justify-end space-x-4">
+            <button
+              @click="saveOrder"
+              class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+            >
+              Save
+            </button>
+            <button
+              @click="cancelAddOrder"
               class="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded"
             >
               Cancel
@@ -515,11 +658,13 @@ export default {
   setup() {
     const bills = ref([]);
     const billers = ref([]);
+    const orders = ref([]);
     const showAddBillPopup = ref(false);
     const showMarkAsPaidPopup = ref(false);
-    const showShowBillerPopup = ref(false);
     const showAddBillerPopup = ref(false);
     const showBankDetailsPopup = ref(false);
+    const showAddOrderPopup = ref(false);
+    const currentView = ref("smartDue");
     const newBill = ref({
       biller: "",
       billing_date: "",
@@ -527,6 +672,13 @@ export default {
       due_date: "",
       status: "pending",
       remarks: "",
+    });
+    const newOrder = ref({
+      biller: "",
+      order_placed_on: "",
+      order_items: "",
+      transport: "",
+      drive_link: "",
     });
     const dateFilterStart = ref("");
     const dateFilterEnd = ref("");
@@ -557,11 +709,23 @@ export default {
         const billerResponse = await fetch(
           "https://opensheet.elk.sh/15McAhzua0NK0vGVObPDp4Npc5SV27v15Ec7gY0LG34I/Billerdata"
         );
-        if (billResponse.ok && billerResponse.ok) {
+        const orderResponse = await fetch(
+          "https://opensheet.elk.sh/15McAhzua0NK0vGVObPDp4Npc5SV27v15Ec7gY0LG34I/OrderDetails"
+        );
+        if (billResponse.ok && billerResponse.ok && orderResponse.ok) {
           bills.value = await billResponse.json();
           billers.value = await billerResponse.json();
+          orders.value = await orderResponse.json();
+          console.log("Fetched orders:", orders.value); // Debug log
           localStorage.setItem("billData", JSON.stringify(bills.value));
           localStorage.setItem("billerData", JSON.stringify(billers.value));
+          localStorage.setItem("orderData", JSON.stringify(orders.value));
+        } else {
+          console.error("Fetch failed:", {
+            billStatus: billResponse.status,
+            billerStatus: billerResponse.status,
+            orderStatus: orderResponse.status,
+          });
         }
       } catch (error) {
         console.error("Sync error:", error);
@@ -584,7 +748,7 @@ export default {
         });
         if (!response.ok) throw new Error("Network response was not ok");
         const result = await response.text();
-        console.log("Raw response:", result);
+        console.log("Save response:", result);
         const jsonResult = result ? JSON.parse(result) : { success: true };
         if (jsonResult.success) {
           await syncWithGoogleSheets();
@@ -599,6 +763,8 @@ export default {
     onMounted(() => {
       bills.value = JSON.parse(localStorage.getItem("billData") || "[]");
       billers.value = JSON.parse(localStorage.getItem("billerData") || "[]");
+      orders.value = JSON.parse(localStorage.getItem("orderData") || "[]");
+      console.log("Initial orders from localStorage:", orders.value); // Debug log
       syncWithGoogleSheets();
     });
 
@@ -632,6 +798,24 @@ export default {
         newBiller.value.accountNo === newBiller.value.reenterAccountNo
       );
     });
+
+    const isOrderValid = computed(() => {
+      return (
+        newOrder.value.biller &&
+        newOrder.value.order_placed_on &&
+        newOrder.value.order_items &&
+        newOrder.value.transport &&
+        newOrder.value.drive_link
+      );
+    });
+
+    const setView = (view) => {
+      currentView.value = view;
+      if (view !== "smartDue") {
+        dateFilterStart.value = "";
+        dateFilterEnd.value = "";
+      }
+    };
 
     const getDueInDays = (bill) => {
       const billDate = new Date(bill.due_date.split("/").reverse().join("-"));
@@ -696,8 +880,15 @@ export default {
       showAddBillPopup.value = true;
     };
 
-    const openShowBillerPopup = () => {
-      showShowBillerPopup.value = true;
+    const openAddOrderPopup = () => {
+      newOrder.value = {
+        biller: billers.value.length ? billers.value[0].name : "",
+        order_placed_on: today,
+        order_items: "",
+        transport: "",
+        drive_link: "",
+      };
+      showAddOrderPopup.value = true;
     };
 
     const openEditBillerPopup = (biller) => {
@@ -741,6 +932,20 @@ export default {
       showAddBillPopup.value = false;
     };
 
+    const saveOrder = async () => {
+      if (!isOrderValid.value) {
+        alert("Please fill all required fields.");
+        return;
+      }
+      const orderData = {
+        ...newOrder.value,
+        order_placed_on: formatIndianDate(newOrder.value.order_placed_on),
+        action: "addOrder",
+      };
+      await saveToGoogleSheets(orderData);
+      showAddOrderPopup.value = false;
+    };
+
     const confirmMarkAsPaid = async () => {
       if (
         ["sahil", "aparna", "slnp"].includes(markAsPaidName.value.toLowerCase())
@@ -757,8 +962,8 @@ export default {
     };
 
     const cancelAddBill = () => (showAddBillPopup.value = false);
+    const cancelAddOrder = () => (showAddOrderPopup.value = false);
     const cancelMarkAsPaid = () => (showMarkAsPaidPopup.value = false);
-    const cancelShowBiller = () => (showShowBillerPopup.value = false);
     const cancelAddBiller = () => (showAddBillerPopup.value = false);
     const cancelBankDetails = () => {
       showBankDetailsPopup.value = false;
@@ -813,12 +1018,15 @@ export default {
     return {
       bills,
       billers,
+      orders,
       showAddBillPopup,
       showMarkAsPaidPopup,
-      showShowBillerPopup,
       showAddBillerPopup,
       showBankDetailsPopup,
+      showAddOrderPopup,
+      currentView,
       newBill,
+      newOrder,
       newBiller,
       markAsPaidName,
       selectedBill,
@@ -828,22 +1036,25 @@ export default {
       today,
       filteredBills,
       isBillerValid,
+      isOrderValid,
+      setView,
       getDueInDays,
       getStatus,
       formatIndianCurrency,
       formatIndianDate,
       openAddBillPopup,
       openEditBillPopup,
-      openShowBillerPopup,
+      openAddOrderPopup,
       openEditBillerPopup,
       openMarkAsPaidPopup,
       openBankDetailsPopup,
       copyToClipboard,
       saveBill,
+      saveOrder,
       confirmMarkAsPaid,
       cancelAddBill,
+      cancelAddOrder,
       cancelMarkAsPaid,
-      cancelShowBiller,
       cancelAddBiller,
       cancelBankDetails,
       openAddBillerPopup,
