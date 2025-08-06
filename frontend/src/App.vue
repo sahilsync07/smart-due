@@ -10,23 +10,17 @@
         >
       </div>
     </header>
-    <div class="container mx-auto p-4">
+    <div class="container mx-auto p-4 relative">
       <div class="controls-container">
         <div class="button-group">
           <button
             @click="setView('smartDue')"
             :class="[
-              'bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded',
-              { 'bg-blue-700': currentView === 'smartDue' },
+              'orders-placed-button font-bold py-2 px-4 rounded',
+              { 'orders-placed-button-active': currentView === 'smartDue' },
             ]"
           >
-            Smart Due
-          </button>
-          <button
-            @click="openAddBillPopup"
-            class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
-          >
-            Add Bill
+            Dues
           </button>
           <button
             @click="setView('ordersPlaced')"
@@ -35,36 +29,24 @@
               { 'orders-placed-button-active': currentView === 'ordersPlaced' },
             ]"
           >
-            Orders Placed
-          </button>
-          <button
-            @click="openAddOrderPopup"
-            class="new-order-button font-bold py-2 px-4 rounded"
-          >
-            New Order
+            Orders
           </button>
           <button
             @click="setView('showBillers')"
             :class="[
-              'bg-indigo-500 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded',
-              { 'bg-indigo-700': currentView === 'showBillers' },
+              'orders-placed-button font-bold py-2 px-4 rounded',
+              { 'orders-placed-button-active': currentView === 'showBillers' },
             ]"
           >
-            Show Billers
-          </button>
-          <button
-            @click="openAddBillerPopup"
-            class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded"
-          >
-            Add Biller
+            Billers
           </button>
         </div>
         <div class="filter-group" v-if="currentView === 'smartDue'">
           <input
             v-model="searchQuery"
             type="text"
-            placeholder="Search by biller, executive, or amount"
-            class="w-64 p-2 rounded border mr-4"
+            placeholder="Search"
+            class="w-64 p-2 rounded border search-input"
           />
           <div class="date-filter-group">
             <input
@@ -83,6 +65,19 @@
           </div>
         </div>
       </div>
+
+      <!-- Floating Action Button -->
+      <button
+        v-if="
+          currentView === 'smartDue' ||
+          currentView === 'ordersPlaced' ||
+          currentView === 'showBillers'
+        "
+        @click="openAddPopup"
+        class="fab bg-blue-500 hover:bg-blue-700 text-white font-bold rounded-full w-12 h-12 flex items-center justify-center shadow-lg"
+      >
+        +
+      </button>
 
       <!-- Smart Due View (Due Table) -->
       <div class="table-responsive" v-if="currentView === 'smartDue'">
@@ -878,9 +873,8 @@ export default {
     });
 
     const sortedBills = computed(() => {
-      let filteredBills = [...bills.value]; // Create a new array to avoid mutating original
+      let filteredBills = [...bills.value];
 
-      // Apply search filter
       if (searchQuery.value) {
         const query = searchQuery.value.toLowerCase();
         filteredBills = filteredBills.filter((bill) => {
@@ -895,7 +889,6 @@ export default {
         });
       }
 
-      // Apply date range filter
       filteredBills = filteredBills.filter((bill) => {
         const billDate = parseIndianDate(bill.due_date || "01/01/1970");
         const startDate = dateFilterStart.value
@@ -911,7 +904,6 @@ export default {
         return true;
       });
 
-      // Apply sorting
       return filteredBills.sort((a, b) => {
         let valueA, valueB;
         if (sortField.value === "amount") {
@@ -1063,6 +1055,16 @@ export default {
       } else {
         sortField.value = field;
         sortDirection.value = "asc";
+      }
+    };
+
+    const openAddPopup = () => {
+      if (currentView.value === "smartDue") {
+        openAddBillPopup();
+      } else if (currentView.value === "ordersPlaced") {
+        openAddOrderPopup();
+      } else if (currentView.value === "showBillers") {
+        openAddBillerPopup();
       }
     };
 
@@ -1288,6 +1290,7 @@ export default {
       setDefaultOrderExecutive,
       calculateDueDate,
       toggleSort,
+      openAddPopup,
     };
   },
 };
@@ -1343,5 +1346,32 @@ export default {
 .date-filter-group {
   display: flex;
   align-items: center;
+}
+.search-input {
+  margin-right: 1rem;
+}
+@media (max-width: 640px) {
+  .filter-group {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .search-input {
+    width: 100%;
+    margin-bottom: 0.5rem;
+    margin-right: 0;
+  }
+  .date-filter-group {
+    width: 100%;
+    justify-content: space-between;
+  }
+  .date-input {
+    width: 48%;
+  }
+}
+.fab {
+  position: fixed;
+  bottom: 2rem;
+  right: 2rem;
+  z-index: 20;
 }
 </style>
