@@ -54,13 +54,13 @@
             <tr
               class="bg-gray-200 text-gray-600 uppercase text-sm leading-normal"
             >
-              <th class="py-3 px-6 text-left">Biller</th>
+              <th class="py-3 px-6 text-left biller">Biller</th>
               <th class="py-3 px-6 text-left">Billing Date</th>
               <th class="py-3 px-6 text-left">Amount</th>
               <th class="py-3 px-6 text-left">Due Date</th>
               <th class="py-3 px-6 text-left">Due In</th>
               <th class="py-3 px-6 text-left">Status</th>
-              <th class="py-3 px-6 text-left">Action</th>
+              <th class="py-3 px-6 text-left action">Action</th>
             </tr>
           </thead>
           <tbody>
@@ -69,7 +69,7 @@
               :key="bill.biller + bill.due_date"
               class="border-b hover:bg-gray-100"
             >
-              <td class="py-3 px-6">{{ bill.biller }}</td>
+              <td class="py-3 px-6 biller">{{ bill.biller }}</td>
               <td class="py-3 px-6">
                 {{ formatIndianDate(bill.billing_date) }}
               </td>
@@ -290,110 +290,114 @@
             Bank Details for {{ selectedBill.biller }}
           </h2>
           <div class="bank-details">
-            <div class="form-group">
-              <label class="block font-medium">Bank Name</label>
-              <div class="flex items-center mt-1">
-                <span class="flex-1">{{ selectedBiller.bankName }}</span>
-                <button
-                  @click="copyToClipboard(selectedBiller.bankName)"
-                  class="bg-gray-300 hover:bg-gray-400 text-black font-bold py-1 px-2 rounded flex items-center ml-2"
-                >
-                  <svg
-                    class="w-4 h-4 mr-1"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                    xmlns="http://www.w3.org/2000/svg"
-                  >
-                    <path
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                      stroke-width="2"
-                      d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"
-                    ></path>
-                  </svg>
-                  Copy
-                </button>
-              </div>
-            </div>
-            <div class="form-group">
-              <label class="block font-medium">Account No</label>
-              <div class="flex items-center mt-1">
-                <span class="flex-1">{{ selectedBiller.accountNo }}</span>
-                <button
-                  @click="copyToClipboard(selectedBiller.accountNo)"
-                  class="bg-gray-300 hover:bg-gray-400 text-black font-bold py-1 px-2 rounded flex items-center ml-2"
-                >
-                  <svg
-                    class="w-4 h-4 mr-1"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                    xmlns="http://www.w3.org/2000/svg"
-                  >
-                    <path
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                      stroke-width="2"
-                      d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"
-                    ></path>
-                  </svg>
-                  Copy
-                </button>
-              </div>
-            </div>
-            <div class="form-group">
-              <label class="block font-medium">IFSC</label>
-              <div class="flex items-center mt-1">
-                <span class="flex-1">{{ selectedBiller.ifsc }}</span>
-                <button
-                  @click="copyToClipboard(selectedBiller.ifsc)"
-                  class="bg-gray-300 hover:bg-gray-400 text-black font-bold py-1 px-2 rounded flex items-center ml-2"
-                >
-                  <svg
-                    class="w-4 h-4 mr-1"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                    xmlns="http://www.w3.org/2000/svg"
-                  >
-                    <path
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                      stroke-width="2"
-                      d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"
-                    ></path>
-                  </svg>
-                  Copy
-                </button>
-              </div>
-            </div>
-            <div class="form-group">
-              <label class="block font-medium">Branch</label>
-              <div class="flex items-center mt-1">
-                <span class="flex-1">{{ selectedBiller.branch }}</span>
-                <button
-                  @click="copyToClipboard(selectedBiller.branch)"
-                  class="bg-gray-300 hover:bg-gray-400 text-black font-bold py-1 px-2 rounded flex items-center ml-2"
-                >
-                  <svg
-                    class="w-4 h-4 mr-1"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                    xmlns="http://www.w3.org/2000/svg"
-                  >
-                    <path
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                      stroke-width="2"
-                      d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"
-                    ></path>
-                  </svg>
-                  Copy
-                </button>
-              </div>
-            </div>
+            <table class="bank-details-table">
+              <tbody>
+                <tr>
+                  <td class="label">Bank Name</td>
+                  <td class="value">{{ selectedBiller.bankName }}</td>
+                  <td class="copy">
+                    <button
+                      @click="copyToClipboard(selectedBiller.bankName)"
+                      class="copy-button bg-gray-300 hover:bg-gray-400 text-black font-bold py-1 px-2 rounded flex items-center"
+                    >
+                      <svg
+                        class="w-4 h-4 mr-1"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                        xmlns="http://www.w3.org/2000/svg"
+                      >
+                        <path
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                          stroke-width="2"
+                          d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"
+                        ></path>
+                      </svg>
+                      Copy
+                    </button>
+                  </td>
+                </tr>
+                <tr>
+                  <td class="label">Account No</td>
+                  <td class="value">{{ selectedBiller.accountNo }}</td>
+                  <td class="copy">
+                    <button
+                      @click="copyToClipboard(selectedBiller.accountNo)"
+                      class="copy-button bg-gray-300 hover:bg-gray-400 text-black font-bold py-1 px-2 rounded flex items-center"
+                    >
+                      <svg
+                        class="w-4 h-4 mr-1"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                        xmlns="http://www.w3.org/2000/svg"
+                      >
+                        <path
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                          stroke-width="2"
+                          d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"
+                        ></path>
+                      </svg>
+                      Copy
+                    </button>
+                  </td>
+                </tr>
+                <tr>
+                  <td class="label">IFSC</td>
+                  <td class="value">{{ selectedBiller.ifsc }}</td>
+                  <td class="copy">
+                    <button
+                      @click="copyToClipboard(selectedBiller.ifsc)"
+                      class="copy-button bg-gray-300 hover:bg-gray-400 text-black font-bold py-1 px-2 rounded flex items-center"
+                    >
+                      <svg
+                        class="w-4 h-4 mr-1"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                        xmlns="http://www.w3.org/2000/svg"
+                      >
+                        <path
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                          stroke-width="2"
+                          d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"
+                        ></path>
+                      </svg>
+                      Copy
+                    </button>
+                  </td>
+                </tr>
+                <tr>
+                  <td class="label">Branch</td>
+                  <td class="value">{{ selectedBiller.branch }}</td>
+                  <td class="copy">
+                    <button
+                      @click="copyToClipboard(selectedBiller.branch)"
+                      class="copy-button bg-gray-300 hover:bg-gray-400 text-black font-bold py-1 px-2 rounded flex items-center"
+                    >
+                      <svg
+                        class="w-4 h-4 mr-1"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                        xmlns="http://www.w3.org/2000/svg"
+                      >
+                        <path
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                          stroke-width="2"
+                          d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"
+                        ></path>
+                      </svg>
+                      Copy
+                    </button>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
           </div>
           <div class="flex justify-end mt-4">
             <button

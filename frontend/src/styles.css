@@ -221,7 +221,7 @@ td {
     padding: 0.91rem 1rem;
     font-size: 1rem;
     text-align: left;
-    white-space: normal;
+    white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
 }
@@ -237,8 +237,9 @@ tr:hover td {
     background: #f5f7fd;
 }
 
-.wrap {
+.biller {
     white-space: normal !important;
+    word-wrap: break-word;
 }
 
 .container {
@@ -313,8 +314,49 @@ tr:hover td {
     gap: 0.5rem;
 }
 
-.bank-details .form-group {
-    margin-bottom: 1.5rem;
+.bank-details-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.bank-details-table tr {
+    border-bottom: 1px solid #ebedf0;
+}
+
+.bank-details-table tr:last-child {
+    border-bottom: none;
+}
+
+.bank-details-table td {
+    padding: 0.5rem;
+    vertical-align: middle;
+}
+
+.bank-details-table .label {
+    width: 30%;
+    font-weight: 500;
+    color: var(--text-main);
+    text-align: left;
+}
+
+.bank-details-table .value {
+    width: 50%;
+    text-align: left;
+    color: var(--text-main);
+}
+
+.bank-details-table .copy {
+    width: 20%;
+    text-align: right;
+}
+
+.bank-details-table .copy-button {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    width: 80px;
+    padding: 0.4rem 0.8rem;
+    font-size: 0.9rem;
 }
 
 .action-cell {
@@ -430,18 +472,35 @@ tr:hover td {
     }
 
     .table-responsive {
-        overflow-x: hidden;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        box-shadow: inset 8px 0 8px -8px rgba(0, 0, 0, 0.1), inset -8px 0 8px -8px rgba(0, 0, 0, 0.1);
     }
 
     table {
-        width: 100%;
+        min-width: 700px;
         font-size: 0.8rem;
     }
 
     th,
     td {
-        padding: 0.5rem 0.3rem;
+        padding: 0.5rem;
         font-size: 0.8rem;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    th.biller,
+    td.biller {
+        min-width: 120px;
+        white-space: normal;
+        word-wrap: break-word;
+    }
+
+    th.action,
+    td.action-cell {
+        min-width: 100px;
     }
 
     .action-cell {
@@ -496,17 +555,23 @@ tr:hover td {
         width: 100%;
     }
 
-    .bank-details .form-group {
-        margin-bottom: 1.5rem;
-    }
-}
-
-@media (max-width: 700px) {
-    .table-responsive {
-        overflow-x: hidden;
+    .bank-details-table .label {
+        width: 35%;
+        font-size: 0.8rem;
     }
 
-    table {
-        width: 100%;
+    .bank-details-table .value {
+        width: 45%;
+        font-size: 0.8rem;
+    }
+
+    .bank-details-table .copy {
+        width: 20%;
+    }
+
+    .bank-details-table .copy-button {
+        width: 70px;
+        padding: 0.3rem 0.6rem;
+        font-size: 0.8rem;
     }
 }
