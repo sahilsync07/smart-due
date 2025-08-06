@@ -89,12 +89,13 @@
               <th class="py-3 px-6 text-left">Due Date</th>
               <th class="py-3 px-6 text-left">Due In</th>
               <th class="py-3 px-6 text-left">Status</th>
+              <th class="py-3 px-6 text-left">Executive</th>
               <th class="py-3 px-6 text-left action">Action</th>
             </tr>
           </thead>
           <tbody>
             <tr
-              v-for="bill in filteredBills"
+              v-for="bill in sortedBills"
               :key="bill.biller + bill.due_date"
               class="border-b hover:bg-gray-100"
             >
@@ -116,6 +117,7 @@
               >
                 {{ getStatus(bill) }}
               </td>
+              <td class="py-3 px-6">{{ bill.executive }}</td>
               <td class="py-3 px-6 action-cell">
                 <div class="action-buttons">
                   <button
@@ -134,7 +136,7 @@
                     @click="openBankDetailsPopup(bill)"
                     class="action-button bg-purple-500 hover:bg-purple-700 text-white font-bold py-1 px-2 rounded"
                   >
-                    Bank Details
+                    Bank Info
                   </button>
                 </div>
               </td>
@@ -155,11 +157,12 @@
               <th class="py-3 px-6 text-left">Order Items</th>
               <th class="py-3 px-6 text-left">Transport</th>
               <th class="py-3 px-6 text-left">Drive Link</th>
+              <th class="py-3 px-6 text-left">Executive</th>
             </tr>
           </thead>
           <tbody>
             <tr
-              v-for="(order, index) in orders"
+              v-for="(order, index) in sortedOrders"
               :key="index"
               class="border-b hover:bg-gray-100"
             >
@@ -191,6 +194,7 @@
                   Copy Link
                 </button>
               </td>
+              <td class="py-3 px-6">{{ order.executive }}</td>
             </tr>
           </tbody>
         </table>
@@ -209,12 +213,13 @@
               <th class="py-3 px-6 text-left">IFSC</th>
               <th class="py-3 px-6 text-left">Bank Name</th>
               <th class="py-3 px-6 text-left">Branch</th>
+              <th class="py-3 px-6 text-left">Executive</th>
               <th class="py-3 px-6 text-left">Action</th>
             </tr>
           </thead>
           <tbody>
             <tr
-              v-for="biller in billers"
+              v-for="biller in sortedBillers"
               :key="biller.name"
               class="border-b hover:bg-gray-100"
             >
@@ -224,6 +229,7 @@
               <td class="py-3 px-6">{{ biller.ifsc }}</td>
               <td class="py-3 px-6">{{ biller.bankName }}</td>
               <td class="py-3 px-6">{{ biller.branch }}</td>
+              <td class="py-3 px-6">{{ biller.executive }}</td>
               <td class="py-3 px-6">
                 <button
                   @click="openEditBillerPopup(biller)"
@@ -242,7 +248,13 @@
         v-if="showAddBillPopup"
         class="fixed inset-0 bg-gray-600 bg-opacity-75 flex items-center justify-center popup"
       >
-        <div class="bg-white p-6 rounded shadow-lg w-full max-w-[600px]">
+        <div
+          class="bg-white p-6 rounded shadow-lg w-full max-w-[600px] relative"
+        >
+          <div v-if="loading" class="loading-overlay">
+            <div class="loading-spinner"></div>
+            <span class="loading-text">Saving...</span>
+          </div>
           <h2 class="text-xl mb-4">
             {{ editBillMode ? "Edit Bill" : "Add Bill" }}
           </h2>
@@ -252,6 +264,7 @@
               v-model="newBill.biller"
               class="w-full p-2 border rounded mt-1"
               required
+              @change="setDefaultExecutive"
             >
               <option
                 v-for="biller in billers"
@@ -270,6 +283,7 @@
               class="w-full p-2 border rounded mt-1 date-input"
               placeholder="Billing Date"
               required
+              @input="calculateDueDate"
             />
           </div>
           <div class="form-group">
@@ -292,6 +306,15 @@
             />
           </div>
           <div class="form-group">
+            <label>Executive</label>
+            <input
+              v-model="newBill.executive"
+              type="text"
+              class="w-full p-2 border rounded mt-1"
+              required
+            />
+          </div>
+          <div class="form-group">
             <label>Remarks</label>
             <input
               v-model="newBill.remarks"
@@ -303,12 +326,14 @@
             <button
               @click="saveBill"
               class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+              :disabled="loading"
             >
               {{ editBillMode ? "Update" : "Save" }}
             </button>
             <button
               @click="cancelAddBill"
               class="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded"
+              :disabled="loading"
             >
               Cancel
             </button>
@@ -321,7 +346,13 @@
         v-if="showAddOrderPopup"
         class="fixed inset-0 bg-gray-600 bg-opacity-75 flex items-center justify-center popup"
       >
-        <div class="bg-white p-6 rounded shadow-lg w-full max-w-[600px]">
+        <div
+          class="bg-white p-6 rounded shadow-lg w-full max-w-[600px] relative"
+        >
+          <div v-if="loading" class="loading-overlay">
+            <div class="loading-spinner"></div>
+            <span class="loading-text">Saving...</span>
+          </div>
           <h2 class="text-xl mb-4">New Order</h2>
           <div class="form-group">
             <label>Biller</label>
@@ -329,6 +360,7 @@
               v-model="newOrder.biller"
               class="w-full p-2 border rounded mt-1"
               required
+              @change="setDefaultOrderExecutive"
             >
               <option
                 v-for="biller in billers"
@@ -376,16 +408,27 @@
               required
             />
           </div>
+          <div class="form-group">
+            <label>Executive</label>
+            <input
+              v-model="newOrder.executive"
+              type="text"
+              class="w-full p-2 border rounded mt-1"
+              required
+            />
+          </div>
           <div class="flex justify-end space-x-4">
             <button
               @click="saveOrder"
               class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+              :disabled="loading"
             >
               Save
             </button>
             <button
               @click="cancelAddOrder"
               class="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded"
+              :disabled="loading"
             >
               Cancel
             </button>
@@ -398,24 +441,33 @@
         v-if="showMarkAsPaidPopup"
         class="fixed inset-0 bg-gray-600 bg-opacity-75 flex items-center justify-center popup"
       >
-        <div class="bg-white p-6 rounded shadow-lg w-full max-w-[600px]">
+        <div
+          class="bg-white p-6 rounded shadow-lg w-full max-w-[600px] relative"
+        >
+          <div v-if="loading" class="loading-overlay">
+            <div class="loading-spinner"></div>
+            <span class="loading-text">Saving...</span>
+          </div>
           <h2 class="text-xl mb-4">What is your name?</h2>
           <input
             v-model="markAsPaidName"
             type="text"
             placeholder="Enter 'sahil', 'aparna', or 'slnp'"
             class="w-full p-2 mb-4 border rounded"
+            :disabled="loading"
           />
           <div class="flex justify-end space-x-4">
             <button
               @click="confirmMarkAsPaid"
               class="bg-yellow-500 hover:bg-yellow-700 text-white font-bold py-2 px-4 rounded"
+              :disabled="loading"
             >
               Confirm
             </button>
             <button
               @click="cancelMarkAsPaid"
               class="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded"
+              :disabled="loading"
             >
               Cancel
             </button>
@@ -558,7 +610,13 @@
         v-if="showAddBillerPopup"
         class="fixed inset-0 bg-gray-600 bg-opacity-75 flex items-center justify-center popup"
       >
-        <div class="bg-white p-6 rounded shadow-lg w-full max-w-[600px]">
+        <div
+          class="bg-white p-6 rounded shadow-lg w-full max-w-[600px] relative"
+        >
+          <div v-if="loading" class="loading-overlay">
+            <div class="loading-spinner"></div>
+            <span class="loading-text">Saving...</span>
+          </div>
           <h2 class="text-xl mb-4">
             {{ editBillerMode ? "Edit Biller" : "Add Biller" }}
           </h2>
@@ -630,17 +688,27 @@
               readonly
             />
           </div>
+          <div class="form-group">
+            <label>Executive</label>
+            <input
+              v-model="newBiller.executive"
+              type="text"
+              class="w-full p-2 border rounded mt-1"
+              required
+            />
+          </div>
           <div class="flex justify-end space-x-4">
             <button
               @click="saveBiller"
               class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
-              :disabled="!isBillerValid"
+              :disabled="loading || !isBillerValid"
             >
               {{ editBillerMode ? "Update" : "Save" }}
             </button>
             <button
               @click="cancelAddBiller"
               class="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded"
+              :disabled="loading"
             >
               Cancel
             </button>
@@ -672,6 +740,7 @@ export default {
       due_date: "",
       status: "pending",
       remarks: "",
+      executive: "",
     });
     const newOrder = ref({
       biller: "",
@@ -679,6 +748,7 @@ export default {
       order_items: "",
       transport: "",
       drive_link: "",
+      executive: "",
     });
     const dateFilterStart = ref("");
     const dateFilterEnd = ref("");
@@ -690,12 +760,14 @@ export default {
       reenterAccountNo: "",
       ifsc: "",
       branch: "",
+      executive: "",
     });
     const markAsPaidName = ref("");
     const selectedBill = ref(null);
     const selectedBiller = ref(null);
     const editBillMode = ref(false);
     const editBillerMode = ref(false);
+    const loading = ref(false);
     const today = new Date().toLocaleDateString("en-GB").split("/").join("/");
 
     const webAppUrl =
@@ -716,7 +788,7 @@ export default {
           bills.value = await billResponse.json();
           billers.value = await billerResponse.json();
           orders.value = await orderResponse.json();
-          console.log("Fetched orders:", orders.value); // Debug log
+          console.log("Fetched orders:", orders.value);
           localStorage.setItem("billData", JSON.stringify(bills.value));
           localStorage.setItem("billerData", JSON.stringify(billers.value));
           localStorage.setItem("orderData", JSON.stringify(orders.value));
@@ -734,6 +806,7 @@ export default {
 
     const saveToGoogleSheets = async (data) => {
       try {
+        loading.value = true;
         const response = await fetch(webAppUrl, {
           method: "POST",
           redirect: "follow",
@@ -754,9 +827,13 @@ export default {
           await syncWithGoogleSheets();
         } else {
           console.error("Save failed:", jsonResult.error);
+          alert("Failed to save: " + jsonResult.error);
         }
       } catch (error) {
         console.error("Save error:", error);
+        alert("Error saving data: " + error.message);
+      } finally {
+        loading.value = false;
       }
     };
 
@@ -764,26 +841,43 @@ export default {
       bills.value = JSON.parse(localStorage.getItem("billData") || "[]");
       billers.value = JSON.parse(localStorage.getItem("billerData") || "[]");
       orders.value = JSON.parse(localStorage.getItem("orderData") || "[]");
-      console.log("Initial orders from localStorage:", orders.value); // Debug log
+      console.log("Initial orders from localStorage:", orders.value);
       syncWithGoogleSheets();
     });
 
-    const filteredBills = computed(() => {
-      return bills.value.filter((bill) => {
-        const billDate = new Date(bill.due_date.split("/").reverse().join("-"));
-        const startDate = dateFilterStart.value
-          ? new Date(dateFilterStart.value.split("/").reverse().join("-"))
-          : null;
-        const endDate = dateFilterEnd.value
-          ? new Date(dateFilterEnd.value.split("/").reverse().join("-"))
-          : null;
+    const sortedBills = computed(() => {
+      return [...bills.value]
+        .sort((a, b) => {
+          const dateA = parseIndianDate(a.billing_date);
+          const dateB = parseIndianDate(b.billing_date);
+          return dateA - dateB;
+        })
+        .filter((bill) => {
+          const billDate = parseIndianDate(bill.due_date);
+          const startDate = dateFilterStart.value
+            ? parseIndianDate(convertToIndianDate(dateFilterStart.value))
+            : null;
+          const endDate = dateFilterEnd.value
+            ? parseIndianDate(convertToIndianDate(dateFilterEnd.value))
+            : null;
+          if (startDate && endDate)
+            return billDate >= startDate && billDate <= endDate;
+          if (startDate) return billDate >= startDate;
+          if (endDate) return billDate <= endDate;
+          return true;
+        });
+    });
 
-        if (startDate && endDate)
-          return billDate >= startDate && billDate <= endDate;
-        if (startDate) return billDate >= startDate;
-        if (endDate) return billDate <= endDate;
-        return true;
+    const sortedOrders = computed(() => {
+      return [...orders.value].sort((a, b) => {
+        const dateA = parseIndianDate(a.order_placed_on);
+        const dateB = parseIndianDate(b.order_placed_on);
+        return dateA - dateB;
       });
+    });
+
+    const sortedBillers = computed(() => {
+      return [...billers.value].sort((a, b) => a.name.localeCompare(b.name));
     });
 
     const isBillerValid = computed(() => {
@@ -795,6 +889,7 @@ export default {
         newBiller.value.reenterAccountNo &&
         newBiller.value.ifsc &&
         newBiller.value.branch &&
+        newBiller.value.executive &&
         newBiller.value.accountNo === newBiller.value.reenterAccountNo
       );
     });
@@ -805,7 +900,8 @@ export default {
         newOrder.value.order_placed_on &&
         newOrder.value.order_items &&
         newOrder.value.transport &&
-        newOrder.value.drive_link
+        newOrder.value.drive_link &&
+        newOrder.value.executive
       );
     });
 
@@ -817,9 +913,15 @@ export default {
       }
     };
 
+    const parseIndianDate = (dateStr) => {
+      if (!dateStr) return new Date(0);
+      const [day, month, year] = dateStr.split("/");
+      return new Date(`${year}-${month}-${day}`);
+    };
+
     const getDueInDays = (bill) => {
-      const billDate = new Date(bill.due_date.split("/").reverse().join("-"));
-      const todayDate = new Date(today.split("/").reverse().join("-"));
+      const billDate = parseIndianDate(bill.due_date);
+      const todayDate = parseIndianDate(today);
       const diffTime = billDate - todayDate;
       const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
       return diffDays;
@@ -843,8 +945,11 @@ export default {
 
     const formatIndianDate = (dateStr) => {
       if (!dateStr) return "";
-      const [day, month, year] = dateStr.split("/");
-      return `${day}/${month}/${year}`;
+      if (dateStr.includes("-")) {
+        const [year, month, day] = dateStr.split("-");
+        return `${day}/${month}/${year}`;
+      }
+      return dateStr;
     };
 
     const convertToIndianDate = (dateStr) => {
@@ -853,14 +958,53 @@ export default {
       return `${day}/${month}/${year}`;
     };
 
+    const calculateDueDate = () => {
+      if (newBill.value.biller && newBill.value.billing_date) {
+        const selectedBiller = billers.value.find(
+          (b) => b.name === newBill.value.biller
+        );
+        if (selectedBiller && selectedBiller.creditDuration) {
+          const [year, month, day] = newBill.value.billing_date.split("-");
+          const billingDate = new Date(`${year}-${month}-${day}`);
+          const dueDate = new Date(billingDate);
+          dueDate.setDate(
+            billingDate.getDate() + Number(selectedBiller.creditDuration)
+          );
+          const dueDay = String(dueDate.getDate()).padStart(2, "0");
+          const dueMonth = String(dueDate.getMonth() + 1).padStart(2, "0");
+          const dueYear = dueDate.getFullYear();
+          newBill.value.due_date = `${dueYear}-${dueMonth}-${dueDay}`;
+        } else {
+          newBill.value.due_date = "";
+        }
+      } else {
+        newBill.value.due_date = "";
+      }
+    };
+
+    const setDefaultExecutive = () => {
+      const selectedBiller = billers.value.find(
+        (b) => b.name === newBill.value.biller
+      );
+      newBill.value.executive = selectedBiller ? selectedBiller.executive : "";
+    };
+
+    const setDefaultOrderExecutive = () => {
+      const selectedBiller = billers.value.find(
+        (b) => b.name === newOrder.value.biller
+      );
+      newOrder.value.executive = selectedBiller ? selectedBiller.executive : "";
+    };
+
     const openAddBillPopup = () => {
       newBill.value = {
         biller: billers.value.length ? billers.value[0].name : "",
-        billing_date: today,
+        billing_date: "",
         amount: null,
-        due_date: today,
+        due_date: "",
         status: "pending",
         remarks: "",
+        executive: billers.value.length ? billers.value[0].executive : "",
       };
       editBillMode.value = false;
       showAddBillPopup.value = true;
@@ -869,12 +1013,8 @@ export default {
     const openEditBillPopup = (bill) => {
       newBill.value = {
         ...bill,
-        billing_date: bill.billing_date.includes("-")
-          ? convertToIndianDate(bill.billing_date)
-          : bill.billing_date,
-        due_date: bill.due_date.includes("-")
-          ? convertToIndianDate(bill.due_date)
-          : bill.due_date,
+        billing_date: formatIndianDate(bill.billing_date),
+        due_date: formatIndianDate(bill.due_date),
       };
       editBillMode.value = true;
       showAddBillPopup.value = true;
@@ -887,6 +1027,7 @@ export default {
         order_items: "",
         transport: "",
         drive_link: "",
+        executive: billers.value.length ? billers.value[0].executive : "",
       };
       showAddOrderPopup.value = true;
     };
@@ -924,8 +1065,8 @@ export default {
       }
       const billData = {
         ...newBill.value,
-        billing_date: formatIndianDate(newBill.value.billing_date),
-        due_date: formatIndianDate(newBill.value.due_date),
+        billing_date: convertToIndianDate(newBill.value.billing_date),
+        due_date: convertToIndianDate(newBill.value.due_date),
         action: editBillMode.value ? "editBill" : "addBill",
       };
       await saveToGoogleSheets(billData);
@@ -980,14 +1121,19 @@ export default {
         reenterAccountNo: "",
         ifsc: "",
         branch: "",
+        executive: "",
       };
       editBillerMode.value = false;
       showAddBillerPopup.value = true;
     };
 
     const saveBiller = async () => {
+      if (newBiller.value.accountNo !== newBiller.value.reenterAccountNo) {
+        alert("Account numbers do not match.");
+        return;
+      }
       if (!isBillerValid.value) {
-        alert("Account numbers do not match or required fields are missing.");
+        alert("Please fill all required fields.");
         return;
       }
       await saveToGoogleSheets({ ...newBiller.value, action: "addBiller" });
@@ -1033,8 +1179,11 @@ export default {
       selectedBiller,
       editBillMode,
       editBillerMode,
+      loading,
       today,
-      filteredBills,
+      sortedBills,
+      sortedOrders,
+      sortedBillers,
       isBillerValid,
       isOrderValid,
       setView,
@@ -1062,6 +1211,9 @@ export default {
       dateFilterStart,
       dateFilterEnd,
       fetchBankAndBranch,
+      setDefaultExecutive,
+      setDefaultOrderExecutive,
+      calculateDueDate,
     };
   },
 };
@@ -1074,5 +1226,39 @@ export default {
 }
 .account-no-input {
   -webkit-text-security: disc;
+}
+.loading-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  z-index: 10;
+}
+.loading-spinner {
+  border: 4px solid #f3f3f3;
+  border-top: 4px solid #3498db;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  animation: spin 1s linear infinite;
+}
+.loading-text {
+  color: white;
+  font-size: 1.2rem;
+  margin-top: 10px;
+}
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
 }
 </style>
