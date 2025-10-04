@@ -287,7 +287,10 @@
 
       <div class="popup" v-if="showBillPopup">
         <div>
-          <div v-if="saving" class="saving-overlay">Saving...</div>
+          <div v-if="saving" class="saving-overlay">
+            <div class="loader"></div>
+            Saving...
+          </div>
           <h2>{{ editBillMode ? "Edit Bill" : "Add Bill" }}</h2>
           <div class="form-group">
             <label>Biller</label>
@@ -300,25 +303,40 @@
                 {{ biller.name }}
               </option>
             </select>
+            <span v-if="errors.biller" class="error-message">{{
+              errors.biller
+            }}</span>
           </div>
           <div class="form-group">
             <label>Billing Date</label>
             <input type="date" v-model="newBill.billing_date" />
+            <span v-if="errors.billing_date" class="error-message">{{
+              errors.billing_date
+            }}</span>
           </div>
           <div class="form-group">
             <label>Amount</label>
             <input type="number" v-model="newBill.amount" />
+            <span v-if="errors.amount" class="error-message">{{
+              errors.amount
+            }}</span>
           </div>
           <div class="form-group">
             <label>Due Date</label>
             <input type="date" v-model="newBill.due_date" />
+            <span v-if="errors.due_date" class="error-message">{{
+              errors.due_date
+            }}</span>
           </div>
           <div class="form-group">
             <label>Remarks</label>
             <input type="text" v-model="newBill.remarks" />
+            <span v-if="errors.remarks" class="error-message">{{
+              errors.remarks
+            }}</span>
           </div>
           <div class="button-group">
-            <button @click="saveBill">
+            <button @click="validateAndSaveBill">
               {{ editBillMode ? "Update" : "Save" }}
             </button>
             <button class="cancel" @click="closeBillPopup">Cancel</button>
@@ -328,7 +346,10 @@
 
       <div class="popup" v-if="showOrderPopup">
         <div>
-          <div v-if="saving" class="saving-overlay">Saving...</div>
+          <div v-if="saving" class="saving-overlay">
+            <div class="loader"></div>
+            Saving...
+          </div>
           <h2>New Order</h2>
           <div class="form-group">
             <label>Biller</label>
@@ -341,29 +362,47 @@
                 {{ biller.name }}
               </option>
             </select>
+            <span v-if="errors.biller" class="error-message">{{
+              errors.biller
+            }}</span>
           </div>
           <div class="form-group">
             <label>Order Placed On</label>
             <input type="date" v-model="newOrder.order_placed_on" />
+            <span v-if="errors.order_placed_on" class="error-message">{{
+              errors.order_placed_on
+            }}</span>
           </div>
           <div class="form-group">
             <label>Order Items</label>
             <input type="text" v-model="newOrder.order_items" />
+            <span v-if="errors.order_items" class="error-message">{{
+              errors.order_items
+            }}</span>
           </div>
           <div class="form-group">
             <label>Transport</label>
             <input type="text" v-model="newOrder.transport" />
+            <span v-if="errors.transport" class="error-message">{{
+              errors.transport
+            }}</span>
           </div>
           <div class="form-group">
             <label>Drive Link</label>
             <input type="text" v-model="newOrder.drive_link" />
+            <span v-if="errors.drive_link" class="error-message">{{
+              errors.drive_link
+            }}</span>
           </div>
           <div class="form-group">
             <label>Executive</label>
             <input type="text" v-model="newOrder.executive" />
+            <span v-if="errors.executive" class="error-message">{{
+              errors.executive
+            }}</span>
           </div>
           <div class="button-group">
-            <button @click="saveOrder">Save</button>
+            <button @click="validateAndSaveOrder">Save</button>
             <button class="cancel" @click="closeOrderPopup">Cancel</button>
           </div>
         </div>
@@ -440,15 +479,24 @@
 
       <div class="popup" v-if="showBillerPopup">
         <div>
-          <div v-if="saving" class="saving-overlay">Saving...</div>
+          <div v-if="saving" class="saving-overlay">
+            <div class="loader"></div>
+            Saving...
+          </div>
           <h2>{{ editBillerMode ? "Edit Biller" : "Add Biller" }}</h2>
           <div class="form-group">
             <label>Name</label>
             <input type="text" v-model="newBiller.name" />
+            <span v-if="errors.name" class="error-message">{{
+              errors.name
+            }}</span>
           </div>
           <div class="form-group">
             <label>Credit Duration</label>
             <input type="number" v-model="newBiller.creditDuration" />
+            <span v-if="errors.creditDuration" class="error-message">{{
+              errors.creditDuration
+            }}</span>
           </div>
           <div class="form-group">
             <label>Account Number</label>
@@ -457,6 +505,9 @@
               v-model="newBiller.accountNo"
               class="account-no-input"
             />
+            <span v-if="errors.accountNo" class="error-message">{{
+              errors.accountNo
+            }}</span>
           </div>
           <div class="form-group">
             <label>Reenter Account Number</label>
@@ -465,25 +516,40 @@
               v-model="reenterAccountNo"
               class="account-no-input"
             />
+            <span v-if="errors.reenterAccountNo" class="error-message">{{
+              errors.reenterAccountNo
+            }}</span>
           </div>
           <div class="form-group">
             <label>IFSC Code</label>
             <input type="text" v-model="newBiller.ifsc" />
+            <span v-if="errors.ifsc" class="error-message">{{
+              errors.ifsc
+            }}</span>
           </div>
           <div class="form-group">
             <label>Bank Name</label>
             <input type="text" v-model="newBiller.bankName" />
+            <span v-if="errors.bankName" class="error-message">{{
+              errors.bankName
+            }}</span>
           </div>
           <div class="form-group">
             <label>Branch</label>
             <input type="text" v-model="newBiller.branch" />
+            <span v-if="errors.branch" class="error-message">{{
+              errors.branch
+            }}</span>
           </div>
           <div class="form-group">
             <label>Executive</label>
             <input type="text" v-model="newBiller.executive" />
+            <span v-if="errors.executive" class="error-message">{{
+              errors.executive
+            }}</span>
           </div>
           <div class="button-group">
-            <button @click="saveBiller">
+            <button @click="validateAndSaveBiller">
               {{ editBillerMode ? "Update" : "Save" }}
             </button>
             <button class="cancel" @click="closeBillerPopup">Cancel</button>
@@ -513,6 +579,10 @@
     >
       +
     </button>
+
+    <div v-if="toast.message" class="toast" :class="toast.type">
+      {{ toast.message }}
+    </div>
   </div>
 </template>
 
@@ -569,6 +639,8 @@ export default {
       selectedBiller: null,
       confirmActionCallback: null,
       isMobile: window.innerWidth <= 900,
+      errors: {},
+      toast: { message: "", type: "" },
     };
   },
   computed: {
@@ -650,6 +722,7 @@ export default {
     async fetchBills() {
       const { data, error } = await supabase.from("dues").select("*");
       if (error) {
+        this.showToast("Error fetching bills", "error");
         console.error("Error fetching bills:", error);
         return;
       }
@@ -658,6 +731,7 @@ export default {
     async fetchOrders() {
       const { data, error } = await supabase.from("orders").select("*");
       if (error) {
+        this.showToast("Error fetching orders", "error");
         console.error("Error fetching orders:", error);
         return;
       }
@@ -666,6 +740,7 @@ export default {
     async fetchBillers() {
       const { data, error } = await supabase.from("billers").select("*");
       if (error) {
+        this.showToast("Error fetching billers", "error");
         console.error("Error fetching billers:", error);
         return;
       }
@@ -716,10 +791,24 @@ export default {
         executive: "",
         remarks: "",
       };
+      this.errors = {};
       this.showBillPopup = true;
     },
     closeBillPopup() {
       this.showBillPopup = false;
+      this.errors = {};
+    },
+    validateAndSaveBill() {
+      this.errors = {};
+      if (!this.newBill.biller) this.errors.biller = "Biller is required";
+      if (!this.newBill.billing_date)
+        this.errors.billing_date = "Billing date is required";
+      if (!this.newBill.amount || this.newBill.amount <= 0)
+        this.errors.amount = "Valid amount is required";
+      if (!this.newBill.due_date) this.errors.due_date = "Due date is required";
+      if (Object.keys(this.errors).length === 0) {
+        this.saveBill();
+      }
     },
     async saveBill() {
       this.saving = true;
@@ -734,15 +823,18 @@ export default {
       }
       this.saving = false;
       if (error) {
+        this.showToast("Error saving bill", "error");
         console.error("Error saving bill:", error);
         return;
       }
+      this.showToast("Bill saved successfully", "success");
       this.closeBillPopup();
       await this.fetchBills();
     },
     editBill(bill) {
       this.editBillMode = true;
       this.newBill = { ...bill };
+      this.errors = {};
       this.showBillPopup = true;
     },
     async markPaid(bill) {
@@ -752,9 +844,11 @@ export default {
         .update({ is_paid: true, paid_on: today })
         .eq("id", bill.id);
       if (error) {
+        this.showToast("Error marking as paid", "error");
         console.error("Error marking paid:", error);
         return;
       }
+      this.showToast("Marked as paid", "success");
       await this.fetchBills();
     },
     showBankInfo(bill) {
@@ -767,6 +861,7 @@ export default {
     },
     copyText(text) {
       navigator.clipboard.writeText(text);
+      this.showToast("Copied to clipboard", "success");
     },
     openOrderPopup() {
       this.newOrder = {
@@ -777,24 +872,40 @@ export default {
         drive_link: "",
         executive: "",
       };
+      this.errors = {};
       this.showOrderPopup = true;
     },
     closeOrderPopup() {
       this.showOrderPopup = false;
+      this.errors = {};
+    },
+    validateAndSaveOrder() {
+      this.errors = {};
+      if (!this.newOrder.biller) this.errors.biller = "Biller is required";
+      if (!this.newOrder.order_placed_on)
+        this.errors.order_placed_on = "Order placed on date is required";
+      if (!this.newOrder.order_items)
+        this.errors.order_items = "Order items are required";
+      if (Object.keys(this.errors).length === 0) {
+        this.saveOrder();
+      }
     },
     async saveOrder() {
       this.saving = true;
       const { error } = await supabase.from("orders").insert(this.newOrder);
       this.saving = false;
       if (error) {
+        this.showToast("Error saving order", "error");
         console.error("Error saving order:", error);
         return;
       }
+      this.showToast("Order saved successfully", "success");
       this.closeOrderPopup();
       await this.fetchOrders();
     },
     copyLink(link) {
       navigator.clipboard.writeText(link);
+      this.showToast("Link copied to clipboard", "success");
     },
     openBillerPopup() {
       this.editBillerMode = false;
@@ -808,16 +919,31 @@ export default {
         executive: "",
       };
       this.reenterAccountNo = "";
+      this.errors = {};
       this.showBillerPopup = true;
     },
     closeBillerPopup() {
       this.showBillerPopup = false;
+      this.errors = {};
+    },
+    validateAndSaveBiller() {
+      this.errors = {};
+      if (!this.newBiller.name) this.errors.name = "Name is required";
+      if (!this.newBiller.creditDuration || this.newBiller.creditDuration <= 0)
+        this.errors.creditDuration = "Valid credit duration is required";
+      if (this.newBiller.accountNo !== this.reenterAccountNo)
+        this.errors.reenterAccountNo = "Account numbers do not match";
+      if (!this.newBiller.ifsc) this.errors.ifsc = "IFSC code is required";
+      if (!this.newBiller.bankName)
+        this.errors.bankName = "Bank name is required";
+      if (!this.newBiller.branch) this.errors.branch = "Branch is required";
+      if (!this.newBiller.executive)
+        this.errors.executive = "Executive is required";
+      if (Object.keys(this.errors).length === 0) {
+        this.saveBiller();
+      }
     },
     async saveBiller() {
-      if (this.newBiller.accountNo !== this.reenterAccountNo) {
-        alert("Account numbers do not match");
-        return;
-      }
       this.saving = true;
       let error;
       if (this.editBillerMode) {
@@ -830,9 +956,11 @@ export default {
       }
       this.saving = false;
       if (error) {
+        this.showToast("Error saving biller", "error");
         console.error("Error saving biller:", error);
         return;
       }
+      this.showToast("Biller saved successfully", "success");
       this.closeBillerPopup();
       await this.fetchBillers();
     },
@@ -840,6 +968,7 @@ export default {
       this.editBillerMode = true;
       this.newBiller = { ...biller };
       this.reenterAccountNo = biller.accountNo;
+      this.errors = {};
       this.showBillerPopup = true;
     },
     closeConfirmPopup() {
@@ -848,6 +977,12 @@ export default {
     confirmAction() {
       this.confirmActionCallback();
       this.closeConfirmPopup();
+    },
+    showToast(message, type = "success") {
+      this.toast = { message, type };
+      setTimeout(() => {
+        this.toast = { message: "", type: "" };
+      }, 3000);
     },
     // Add other methods as needed
   },
