@@ -110,7 +110,7 @@ select {
     appearance: none;
     -webkit-appearance: none;
     -moz-appearance: none;
-    font-family: 'Inter', 'Poppins', Arial, sans-serif;
+    font-family: 'Inter', 'Poppins', Arial, Helvetica, sans-serif;
     box-sizing: border-box;
 }
 
@@ -200,6 +200,10 @@ select option {
 .tab-buttons {
     display: flex;
     border-bottom: 1px solid var(--border-color);
+    padding-top: 0.5rem;
+    padding-left: 0.5rem;
+    padding-right: 0.5rem;
+    /* Added padding to give space from top */
 }
 
 .tab-button {
@@ -248,6 +252,8 @@ select option {
 .table-responsive {
     width: 100%;
     overflow-x: auto;
+    overflow-y: auto;
+    /* Added for vertical scrolling if needed */
 }
 
 table {

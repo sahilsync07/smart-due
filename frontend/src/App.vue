@@ -79,67 +79,69 @@
                 }}
               </button>
             </div>
-            <div class="desktop-view">
-              <table>
-                <thead>
-                  <tr>
-                    <th class="biller">Biller</th>
-                    <th @click="sortBy('billing_date')">
-                      Billing Date
-                      <span v-if="sortColumn === 'billing_date'">{{
-                        sortDirection === "asc" ? "↑" : "↓"
-                      }}</span>
-                    </th>
-                    <th @click="sortBy('amount')">
-                      Amount
-                      <span v-if="sortColumn === 'amount'">{{
-                        sortDirection === "asc" ? "↑" : "↓"
-                      }}</span>
-                    </th>
-                    <th @click="sortBy('due_date')">
-                      Due Date
-                      <span v-if="sortColumn === 'due_date'">{{
-                        sortDirection === "asc" ? "↑" : "↓"
-                      }}</span>
-                    </th>
-                    <th>Due In</th>
-                    <th>Status</th>
-                    <th>Executive</th>
-                    <th>Action</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr v-for="bill in filteredBills" :key="bill.id">
-                    <td class="biller">{{ bill.biller }}</td>
-                    <td>{{ formatIndianDate(bill.billing_date) }}</td>
-                    <td>{{ formatIndianCurrency(bill.amount) }}</td>
-                    <td>{{ formatIndianDate(bill.due_date) }}</td>
-                    <td>{{ getDueInDays(bill) }}</td>
-                    <td>{{ getStatus(bill) }}</td>
-                    <td>{{ bill.executive }}</td>
-                    <td class="action-cell">
-                      <div class="action-buttons">
-                        <button class="action-button" @click="editBill(bill)">
-                          Edit Bill
-                        </button>
-                        <button
-                          v-if="!bill.is_paid"
-                          class="action-button"
-                          @click="markPaid(bill)"
-                        >
-                          Mark Paid
-                        </button>
-                        <button
-                          class="action-button"
-                          @click="showBankInfo(bill)"
-                        >
-                          Bank Info
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
+            <div class="table-responsive">
+              <div class="desktop-view">
+                <table>
+                  <thead>
+                    <tr>
+                      <th class="biller">Biller</th>
+                      <th @click="sortBy('billing_date')">
+                        Billing Date
+                        <span v-if="sortColumn === 'billing_date'">{{
+                          sortDirection === "asc" ? "↑" : "↓"
+                        }}</span>
+                      </th>
+                      <th @click="sortBy('amount')">
+                        Amount
+                        <span v-if="sortColumn === 'amount'">{{
+                          sortDirection === "asc" ? "↑" : "↓"
+                        }}</span>
+                      </th>
+                      <th @click="sortBy('due_date')">
+                        Due Date
+                        <span v-if="sortColumn === 'due_date'">{{
+                          sortDirection === "asc" ? "↑" : "↓"
+                        }}</span>
+                      </th>
+                      <th>Due In</th>
+                      <th>Status</th>
+                      <th>Executive</th>
+                      <th>Action</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr v-for="bill in filteredBills" :key="bill.id">
+                      <td class="biller">{{ bill.biller }}</td>
+                      <td>{{ formatIndianDate(bill.billing_date) }}</td>
+                      <td>{{ formatIndianCurrency(bill.amount) }}</td>
+                      <td>{{ formatIndianDate(bill.due_date) }}</td>
+                      <td>{{ getDueInDays(bill) }}</td>
+                      <td>{{ getStatus(bill) }}</td>
+                      <td>{{ bill.executive }}</td>
+                      <td class="action-cell">
+                        <div class="action-buttons">
+                          <button class="action-button" @click="editBill(bill)">
+                            Edit Bill
+                          </button>
+                          <button
+                            v-if="!bill.is_paid"
+                            class="action-button"
+                            @click="markPaid(bill)"
+                          >
+                            Mark Paid
+                          </button>
+                          <button
+                            class="action-button"
+                            @click="showBankInfo(bill)"
+                          >
+                            Bank Info
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
             </div>
             <div class="mobile-view">
               <div v-for="bill in filteredBills" :key="bill.id" class="card">
@@ -178,39 +180,41 @@
             </div>
           </div>
           <div v-if="activeTab === 'orders'" class="tab-panel">
-            <div class="desktop-view">
-              <table>
-                <thead>
-                  <tr>
-                    <th class="biller">Biller</th>
-                    <th>Order Placed On</th>
-                    <th>Order Items</th>
-                    <th>Transport</th>
-                    <th>Drive Link</th>
-                    <th>Executive</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr v-for="order in orders" :key="order.id">
-                    <td class="biller">{{ order.biller }}</td>
-                    <td>{{ formatIndianDate(order.order_placed_on) }}</td>
-                    <td>{{ order.order_items }}</td>
-                    <td>{{ order.transport }}</td>
-                    <td>
-                      <a :href="order.drive_link" target="_blank">
-                        <button class="copy-button">Open Link</button>
-                      </a>
-                      <button
-                        class="copy-button"
-                        @click="copyLink(order.drive_link)"
-                      >
-                        Copy Link
-                      </button>
-                    </td>
-                    <td>{{ order.executive }}</td>
-                  </tr>
-                </tbody>
-              </table>
+            <div class="table-responsive">
+              <div class="desktop-view">
+                <table>
+                  <thead>
+                    <tr>
+                      <th class="biller">Biller</th>
+                      <th>Order Placed On</th>
+                      <th>Order Items</th>
+                      <th>Transport</th>
+                      <th>Drive Link</th>
+                      <th>Executive</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr v-for="order in orders" :key="order.id">
+                      <td class="biller">{{ order.biller }}</td>
+                      <td>{{ formatIndianDate(order.order_placed_on) }}</td>
+                      <td>{{ order.order_items }}</td>
+                      <td>{{ order.transport }}</td>
+                      <td>
+                        <a :href="order.drive_link" target="_blank">
+                          <button class="copy-button">Open Link</button>
+                        </a>
+                        <button
+                          class="copy-button"
+                          @click="copyLink(order.drive_link)"
+                        >
+                          Copy Link
+                        </button>
+                      </td>
+                      <td>{{ order.executive }}</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
             </div>
             <div class="mobile-view">
               <div v-for="order in orders" :key="order.id" class="card">
@@ -231,37 +235,42 @@
             </div>
           </div>
           <div v-if="activeTab === 'billers'" class="tab-panel">
-            <div class="desktop-view">
-              <table>
-                <thead>
-                  <tr>
-                    <th>Name</th>
-                    <th>Credit Duration</th>
-                    <th>Account No</th>
-                    <th>IFSC</th>
-                    <th>Bank Name</th>
-                    <th>Branch</th>
-                    <th>Executive</th>
-                    <th>Action</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr v-for="biller in billers" :key="biller.id">
-                    <td>{{ biller.name }}</td>
-                    <td>{{ biller.creditDuration }}</td>
-                    <td>{{ biller.accountNo }}</td>
-                    <td>{{ biller.ifsc }}</td>
-                    <td>{{ biller.bankName }}</td>
-                    <td>{{ biller.branch }}</td>
-                    <td>{{ biller.executive }}</td>
-                    <td class="action-cell">
-                      <button class="action-button" @click="editBiller(biller)">
-                        Edit Biller
-                      </button>
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
+            <div class="table-responsive">
+              <div class="desktop-view">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Name</th>
+                      <th>Credit Duration</th>
+                      <th>Account No</th>
+                      <th>IFSC</th>
+                      <th>Bank Name</th>
+                      <th>Branch</th>
+                      <th>Executive</th>
+                      <th>Action</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr v-for="biller in billers" :key="biller.id">
+                      <td>{{ biller.name }}</td>
+                      <td>{{ biller.creditDuration }}</td>
+                      <td>{{ biller.accountNo }}</td>
+                      <td>{{ biller.ifsc }}</td>
+                      <td>{{ biller.bankName }}</td>
+                      <td>{{ biller.branch }}</td>
+                      <td>{{ biller.executive }}</td>
+                      <td class="action-cell">
+                        <button
+                          class="action-button"
+                          @click="editBiller(biller)"
+                        >
+                          Edit Biller
+                        </button>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
             </div>
             <div class="mobile-view">
               <div v-for="biller in billers" :key="biller.id" class="card">
@@ -755,7 +764,11 @@ export default {
       }
     },
     formatIndianDate(date) {
-      return new Date(date).toLocaleDateString("en-IN");
+      const d = new Date(date);
+      const day = d.getDate().toString().padStart(2, "0");
+      const month = (d.getMonth() + 1).toString().padStart(2, "0");
+      const year = d.getFullYear();
+      return `${day}/${month}/${year}`;
     },
     formatIndianCurrency(amount) {
       return new Intl.NumberFormat("en-IN", {
