@@ -49,7 +49,7 @@
             </div>
             <div class="mobile-sort-buttons" v-if="isMobile">
               <button @click="sortBy('billing_date')">
-                Sort by Billing Date
+                Bill
                 {{
                   sortColumn === "billing_date"
                     ? sortDirection === "asc"
@@ -59,7 +59,7 @@
                 }}
               </button>
               <button @click="sortBy('amount')">
-                Sort by Amount
+                Amount
                 {{
                   sortColumn === "amount"
                     ? sortDirection === "asc"
@@ -69,7 +69,7 @@
                 }}
               </button>
               <button @click="sortBy('due_date')">
-                Sort by Due Date
+                Due
                 {{
                   sortColumn === "due_date"
                     ? sortDirection === "asc"
