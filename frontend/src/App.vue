@@ -40,6 +40,16 @@
                 <span>to</span>
                 <input type="date" v-model="toDate" placeholder="To" />
               </div>
+              <div class="status-filter-group">
+                <label class="checkbox-label">
+                  <input type="checkbox" v-model="showUnpaid" />
+                  Show Unpaid
+                </label>
+                <label class="checkbox-label">
+                  <input type="checkbox" v-model="showPaid" />
+                  Show Paid
+                </label>
+              </div>
               <input
                 type="text"
                 v-model="searchQuery"
@@ -110,7 +120,11 @@
                     </tr>
                   </thead>
                   <tbody>
-                    <tr v-for="bill in filteredBills" :key="bill.id">
+                    <tr
+                      v-for="bill in filteredBills"
+                      :key="bill.id"
+                      :class="{ 'paid-row': bill.is_paid }"
+                    >
                       <td class="biller">{{ bill.biller }}</td>
                       <td>{{ formatIndianDate(bill.billing_date) }}</td>
                       <td>{{ formatIndianCurrency(bill.amount) }}</td>
@@ -131,6 +145,13 @@
                             Mark Paid
                           </button>
                           <button
+                            v-if="bill.is_paid"
+                            class="action-button"
+                            @click="markUnpaid(bill)"
+                          >
+                            Mark Unpaid
+                          </button>
+                          <button
                             class="action-button"
                             @click="showBankInfo(bill)"
                           >
@@ -144,7 +165,12 @@
               </div>
             </div>
             <div class="mobile-view">
-              <div v-for="bill in filteredBills" :key="bill.id" class="card">
+              <div
+                v-for="bill in filteredBills"
+                :key="bill.id"
+                class="card"
+                :class="{ 'paid-card': bill.is_paid }"
+              >
                 <h3>{{ bill.biller }}</h3>
                 <p>
                   <strong>Billing Date:</strong>
@@ -171,6 +197,13 @@
                     @click="markPaid(bill)"
                   >
                     Mark Paid
+                  </button>
+                  <button
+                    v-if="bill.is_paid"
+                    class="action-button"
+                    @click="markUnpaid(bill)"
+                  >
+                    Mark Unpaid
                   </button>
                   <button class="action-button" @click="showBankInfo(bill)">
                     Bank Info
@@ -618,6 +651,8 @@ export default {
       editBillMode: false,
       editBillerMode: false,
       saving: false,
+      showPaid: false,
+      showUnpaid: true,
       newBill: {
         biller: "",
         billing_date: "",
@@ -655,6 +690,17 @@ export default {
   computed: {
     filteredBills() {
       let filtered = this.bills;
+
+      // Apply status filter
+      if (this.showPaid && !this.showUnpaid) {
+        filtered = filtered.filter((bill) => bill.is_paid);
+      } else if (this.showUnpaid && !this.showPaid) {
+        filtered = filtered.filter((bill) => !bill.is_paid);
+      } else if (!this.showPaid && !this.showUnpaid) {
+        filtered = [];
+      }
+
+      // Apply search filter
       if (this.searchQuery) {
         const query = this.searchQuery.toLowerCase();
         filtered = filtered.filter((bill) =>
@@ -663,6 +709,8 @@ export default {
           )
         );
       }
+
+      // Apply date filters
       if (this.fromDate) {
         filtered = filtered.filter(
           (bill) => new Date(bill.billing_date) >= new Date(this.fromDate)
@@ -673,6 +721,8 @@ export default {
           (bill) => new Date(bill.billing_date) <= new Date(this.toDate)
         );
       }
+
+      // Sort the filtered results
       return filtered.sort((a, b) => {
         let valA = a[this.sortColumn];
         let valB = b[this.sortColumn];
@@ -864,6 +914,19 @@ export default {
       this.showToast("Marked as paid", "success");
       await this.fetchBills();
     },
+    async markUnpaid(bill) {
+      const { error } = await supabase
+        .from("dues")
+        .update({ is_paid: false, paid_on: null })
+        .eq("id", bill.id);
+      if (error) {
+        this.showToast("Error marking as unpaid", "error");
+        console.error("Error marking unpaid:", error);
+        return;
+      }
+      this.showToast("Marked as unpaid", "success");
+      await this.fetchBills();
+    },
     showBankInfo(bill) {
       this.selectedBill = bill;
       this.selectedBiller = this.billers.find((b) => b.name === bill.biller);
@@ -997,7 +1060,6 @@ export default {
         this.toast = { message: "", type: "" };
       }, 3000);
     },
-    // Add other methods as needed
   },
 };
 </script>
