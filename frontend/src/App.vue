@@ -31,6 +31,13 @@
           >
             Billers
           </button>
+          <button
+            class="tab-button"
+            :class="{ active: activeTab === 'pdf' }"
+            @click="activeTab = 'pdf'"
+          >
+            PDF Generator
+          </button>
         </div>
         <div class="tab-content">
           <div v-if="activeTab === 'dues'" class="tab-panel">
@@ -322,6 +329,52 @@
                   </button>
                 </div>
               </div>
+            </div>
+          </div>
+          <div v-if="activeTab === 'pdf'" class="tab-panel">
+            <div class="pdf-container">
+              <div v-if="isLoading" class="saving-overlay">
+                <div class="loader"></div>
+                Generating PDF...
+              </div>
+              <h2 class="pdf-title">PDF Generator</h2>
+              <div class="card">
+                <label class="form-label">Select Brands</label>
+                <select multiple v-model="selectedBrands" class="form-select">
+                  <option v-for="brand in brands" :key="brand" :value="brand">
+                    {{ brand }}
+                  </option>
+                </select>
+              </div>
+              <div class="card">
+                <label class="checkbox-label">
+                  <input type="checkbox" v-model="onlyWithPhotos" />
+                  Only include products with photos
+                </label>
+              </div>
+              <div class="card">
+                <label class="checkbox-label">
+                  <input type="checkbox" v-model="minQtyEnabled" />
+                  Only include articles with more than
+                </label>
+                <div class="flex items-center mt-2 gap-2">
+                  <input
+                    type="number"
+                    v-model="minQty"
+                    :disabled="!minQtyEnabled"
+                    class="form-input"
+                    min="0"
+                  />
+                  <span class="text-sm font-medium">quantity</span>
+                </div>
+              </div>
+              <button
+                @click="generatePdf"
+                class="action-button w-full"
+                :disabled="isLoading"
+              >
+                Generate PDF
+              </button>
             </div>
           </div>
         </div>
@@ -630,6 +683,7 @@
 
 <script>
 import { supabase } from "./utils/supabase";
+import axios from "axios";
 
 export default {
   data() {
@@ -638,6 +692,11 @@ export default {
       bills: [],
       orders: [],
       billers: [],
+      brands: [],
+      selectedBrands: [],
+      onlyWithPhotos: true,
+      minQtyEnabled: false,
+      minQty: 6,
       fromDate: "",
       toDate: "",
       searchQuery: "",
@@ -651,6 +710,7 @@ export default {
       editBillMode: false,
       editBillerMode: false,
       saving: false,
+      isLoading: false,
       showPaid: false,
       showUnpaid: true,
       newBill: {
@@ -776,6 +836,7 @@ export default {
         this.fetchBills(),
         this.fetchOrders(),
         this.fetchBillers(),
+        this.fetchBrands(),
       ]);
     },
     async fetchBills() {
@@ -804,6 +865,53 @@ export default {
         return;
       }
       this.billers = data;
+    },
+    async fetchBrands() {
+      try {
+        const jsonUrl =
+          "https://raw.githubusercontent.com/sahilsync07/sbe/main/frontend/public/assets/stock-data.json";
+        const response = await axios.get(jsonUrl);
+        this.brands = [
+          ...new Set(response.data.map((group) => group.groupName)),
+        ];
+      } catch (err) {
+        this.showToast("Error fetching brands", "error");
+        console.error("Error fetching brands:", err);
+      }
+    },
+    async generatePdf() {
+      if (this.selectedBrands.length === 0) {
+        this.showToast("Please select at least one brand", "error");
+        return;
+      }
+      this.isLoading = true;
+      const payload = {
+        brands: this.selectedBrands,
+        onlyWithPhotos: this.onlyWithPhotos,
+        minQty: this.minQtyEnabled ? this.minQty : -1,
+      };
+      try {
+        const response = await axios.post(
+          "http://localhost:3001/generate-pdf",
+          payload,
+          {
+            responseType: "blob",
+          }
+        );
+        const url = window.URL.createObjectURL(new Blob([response.data]));
+        const link = document.createElement("a");
+        link.href = url;
+        link.setAttribute("download", "products.pdf");
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+        this.showToast("PDF generated successfully", "success");
+      } catch (err) {
+        this.showToast("Failed to generate PDF", "error");
+        console.error("Error generating PDF:", err);
+      } finally {
+        this.isLoading = false;
+      }
     },
     sortBy(column) {
       if (this.sortColumn === column) {

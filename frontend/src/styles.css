@@ -82,11 +82,16 @@ button {
     margin-bottom: 0.5rem;
 }
 
+button:disabled {
+    background: var(--text-subtle);
+    cursor: not-allowed;
+}
+
 button:last-child {
     margin-right: 0;
 }
 
-button:hover {
+button:hover:not(:disabled) {
     background: var(--accent);
     box-shadow: 0 2px 8px rgba(99, 102, 241, 0.10);
     transform: translateY(-1px) scale(1.015);
@@ -114,6 +119,11 @@ select {
     box-sizing: border-box;
 }
 
+input[type="number"]:disabled {
+    background: #f4f5fa;
+    color: var(--text-subtle);
+}
+
 input[type="date"]::placeholder {
     color: var(--text-subtle);
     font-family: 'Inter', 'Poppins', Arial, sans-serif;
@@ -136,6 +146,11 @@ select {
     background-size: 1.2em;
     cursor: pointer;
     appearance: none;
+}
+
+select[multiple] {
+    height: 200px;
+    background-image: none;
 }
 
 select::-ms-expand {
@@ -189,6 +204,27 @@ select option {
     padding: 0 0.5rem;
 }
 
+.status-filter-group {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.checkbox-label {
+    display: flex;
+    align-items: center;
+    font-size: 1rem;
+    color: var(--text-main);
+    cursor: pointer;
+}
+
+.checkbox-label input[type="checkbox"] {
+    margin-right: 0.5rem;
+    width: 1.2rem;
+    height: 1.2rem;
+    accent-color: var(--primary);
+}
+
 .tab-container {
     background: var(--surface);
     border-radius: var(--radius);
@@ -203,7 +239,6 @@ select option {
     padding-top: 0.5rem;
     padding-left: 0.5rem;
     padding-right: 0.5rem;
-    /* Added padding to give space from top */
 }
 
 .tab-button {
@@ -253,7 +288,6 @@ select option {
     width: 100%;
     overflow-x: auto;
     overflow-y: auto;
-    /* Added for vertical scrolling if needed */
 }
 
 table {
@@ -289,6 +323,14 @@ tr:hover td {
     background: #f5f7fd;
 }
 
+.paid-row {
+    background-color: rgba(0, 255, 0, 0.1);
+}
+
+.paid-card {
+    background-color: rgba(0, 255, 0, 0.1);
+}
+
 .biller {
     white-space: normal !important;
     word-wrap: break-word;
@@ -319,7 +361,7 @@ tr:hover td {
     color: #fff;
 }
 
-.action-button:hover {
+.action-button:hover:not(:disabled) {
     transform: translateY(-1px) scale(1.015);
     background: var(--accent);
 }
@@ -497,6 +539,62 @@ tr:hover td {
     background: var(--accent);
 }
 
+.pdf-container {
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+.pdf-title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--primary);
+    text-align: center;
+    margin-bottom: 1.5rem;
+}
+
+.form-label {
+    font-size: 1rem;
+    font-weight: 500;
+    color: var(--text-main);
+    display: block;
+    margin-bottom: 0.5rem;
+}
+
+.form-select {
+    padding: 0.6rem 1rem;
+    border: 1.2px solid var(--border-color);
+    border-radius: var(--radius);
+    font-size: 1rem;
+    background: var(--surface);
+    color: var(--text-main);
+    width: 100%;
+    height: 200px;
+    transition: border-color 0.13s, box-shadow 0.13s;
+}
+
+.form-select:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 5px rgba(99, 102, 241, 0.3);
+    outline: none;
+}
+
+.form-input {
+    padding: 0.6rem 1rem;
+    border: 1.2px solid var(--border-color);
+    border-radius: var(--radius);
+    font-size: 1rem;
+    background: var(--surface);
+    color: var(--text-main);
+    width: 100px;
+    transition: border-color 0.13s, box-shadow 0.13s;
+}
+
+.form-input:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 5px rgba(99, 102, 241, 0.3);
+    outline: none;
+}
+
 /* Scrollbar styles */
 ::-webkit-scrollbar {
     width: 8px;
@@ -663,6 +761,11 @@ tr:hover td {
         justify-content: center;
     }
 
+    .status-filter-group {
+        flex: 1;
+        justify-content: center;
+    }
+
     .search-bar {
         flex: 1;
         width: auto;
@@ -757,6 +860,18 @@ tr:hover td {
         flex: 0 1 auto;
         min-width: 80px;
     }
+
+    .pdf-container {
+        max-width: 100%;
+    }
+
+    .form-select {
+        height: 150px;
+    }
+
+    .form-input {
+        width: 80px;
+    }
 }
 
 @media (min-width: 901px) {
@@ -776,6 +891,10 @@ tr:hover td {
         justify-content: flex-end;
     }
 
+    .status-filter-group {
+        justify-content: center;
+    }
+
     .search-bar {
         margin: 0 auto;
     }
@@ -793,8 +912,11 @@ tr:hover td {
         order: 1;
     }
 
-    .search-bar {
+    .status-filter-group {
         order: 2;
     }
-    
+
+    .search-bar {
+        order: 3;
+    }
 }
