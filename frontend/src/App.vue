@@ -40,343 +40,34 @@
           </button>
         </div>
         <div class="tab-content">
-          <div v-if="activeTab === 'dues'" class="tab-panel">
-            <div class="controls-container">
-              <div class="date-filter-group">
-                <input type="date" v-model="fromDate" placeholder="From" />
-                <span>to</span>
-                <input type="date" v-model="toDate" placeholder="To" />
-              </div>
-              <div class="status-filter-group">
-                <label class="checkbox-label">
-                  <input type="checkbox" v-model="showUnpaid" />
-                  Show Unpaid
-                </label>
-                <label class="checkbox-label">
-                  <input type="checkbox" v-model="showPaid" />
-                  Show Paid
-                </label>
-              </div>
-              <input
-                type="text"
-                v-model="searchQuery"
-                placeholder="Search"
-                class="search-bar"
-              />
-            </div>
-            <div class="mobile-sort-buttons" v-if="isMobile">
-              <button @click="sortBy('billing_date')">
-                Bill
-                {{
-                  sortColumn === "billing_date"
-                    ? sortDirection === "asc"
-                      ? "↑"
-                      : "↓"
-                    : ""
-                }}
-              </button>
-              <button @click="sortBy('amount')">
-                Amount
-                {{
-                  sortColumn === "amount"
-                    ? sortDirection === "asc"
-                      ? "↑"
-                      : "↓"
-                    : ""
-                }}
-              </button>
-              <button @click="sortBy('due_date')">
-                Due
-                {{
-                  sortColumn === "due_date"
-                    ? sortDirection === "asc"
-                      ? "↑"
-                      : "↓"
-                    : ""
-                }}
-              </button>
-            </div>
-            <div class="table-responsive">
-              <div class="desktop-view">
-                <table>
-                  <thead>
-                    <tr>
-                      <th class="biller">Biller</th>
-                      <th @click="sortBy('billing_date')">
-                        Billing Date
-                        <span v-if="sortColumn === 'billing_date'">{{
-                          sortDirection === "asc" ? "↑" : "↓"
-                        }}</span>
-                      </th>
-                      <th @click="sortBy('amount')">
-                        Amount
-                        <span v-if="sortColumn === 'amount'">{{
-                          sortDirection === "asc" ? "↑" : "↓"
-                        }}</span>
-                      </th>
-                      <th @click="sortBy('due_date')">
-                        Due Date
-                        <span v-if="sortColumn === 'due_date'">{{
-                          sortDirection === "asc" ? "↑" : "↓"
-                        }}</span>
-                      </th>
-                      <th>Due In</th>
-                      <th>Status</th>
-                      <th>Executive</th>
-                      <th>Action</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr
-                      v-for="bill in filteredBills"
-                      :key="bill.id"
-                      :class="{ 'paid-row': bill.is_paid }"
-                    >
-                      <td class="biller">{{ bill.biller }}</td>
-                      <td>{{ formatIndianDate(bill.billing_date) }}</td>
-                      <td>{{ formatIndianCurrency(bill.amount) }}</td>
-                      <td>{{ formatIndianDate(bill.due_date) }}</td>
-                      <td>{{ getDueInDays(bill) }}</td>
-                      <td>{{ getStatus(bill) }}</td>
-                      <td>{{ bill.executive }}</td>
-                      <td class="action-cell">
-                        <div class="action-buttons">
-                          <button class="action-button" @click="editBill(bill)">
-                            Edit Bill
-                          </button>
-                          <button
-                            v-if="!bill.is_paid"
-                            class="action-button"
-                            @click="markPaid(bill)"
-                          >
-                            Mark Paid
-                          </button>
-                          <button
-                            v-if="bill.is_paid"
-                            class="action-button"
-                            @click="markUnpaid(bill)"
-                          >
-                            Mark Unpaid
-                          </button>
-                          <button
-                            class="action-button"
-                            @click="showBankInfo(bill)"
-                          >
-                            Bank Info
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  </tbody>
-                </table>
-              </div>
-            </div>
-            <div class="mobile-view">
-              <div
-                v-for="bill in filteredBills"
-                :key="bill.id"
-                class="card"
-                :class="{ 'paid-card': bill.is_paid }"
-              >
-                <h3>{{ bill.biller }}</h3>
-                <p>
-                  <strong>Billing Date:</strong>
-                  {{ formatIndianDate(bill.billing_date) }}
-                </p>
-                <p>
-                  <strong>Amount:</strong>
-                  {{ formatIndianCurrency(bill.amount) }}
-                </p>
-                <p>
-                  <strong>Due Date:</strong>
-                  {{ formatIndianDate(bill.due_date) }}
-                </p>
-                <p><strong>Due In:</strong> {{ getDueInDays(bill) }}</p>
-                <p><strong>Status:</strong> {{ getStatus(bill) }}</p>
-                <p><strong>Executive:</strong> {{ bill.executive }}</p>
-                <div class="action-buttons">
-                  <button class="action-button" @click="editBill(bill)">
-                    Edit Bill
-                  </button>
-                  <button
-                    v-if="!bill.is_paid"
-                    class="action-button"
-                    @click="markPaid(bill)"
-                  >
-                    Mark Paid
-                  </button>
-                  <button
-                    v-if="bill.is_paid"
-                    class="action-button"
-                    @click="markUnpaid(bill)"
-                  >
-                    Mark Unpaid
-                  </button>
-                  <button class="action-button" @click="showBankInfo(bill)">
-                    Bank Info
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-          <div v-if="activeTab === 'orders'" class="tab-panel">
-            <div class="table-responsive">
-              <div class="desktop-view">
-                <table>
-                  <thead>
-                    <tr>
-                      <th class="biller">Biller</th>
-                      <th>Order Placed On</th>
-                      <th>Order Items</th>
-                      <th>Transport</th>
-                      <th>Drive Link</th>
-                      <th>Executive</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr v-for="order in orders" :key="order.id">
-                      <td class="biller">{{ order.biller }}</td>
-                      <td>{{ formatIndianDate(order.order_placed_on) }}</td>
-                      <td>{{ order.order_items }}</td>
-                      <td>{{ order.transport }}</td>
-                      <td>
-                        <a :href="order.drive_link" target="_blank">
-                          <button class="copy-button">Open Link</button>
-                        </a>
-                        <button
-                          class="copy-button"
-                          @click="copyLink(order.drive_link)"
-                        >
-                          Copy Link
-                        </button>
-                      </td>
-                      <td>{{ order.executive }}</td>
-                    </tr>
-                  </tbody>
-                </table>
-              </div>
-            </div>
-            <div class="mobile-view">
-              <div v-for="order in orders" :key="order.id" class="card">
-                <h3>{{ order.biller }}</h3>
-                <p>
-                  <strong>Order Placed On:</strong>
-                  {{ formatIndianDate(order.order_placed_on) }}
-                </p>
-                <p><strong>Order Items:</strong> {{ order.order_items }}</p>
-                <p><strong>Transport:</strong> {{ order.transport }}</p>
-                <p>
-                  <strong>Drive Link:</strong>
-                  <a :href="order.drive_link" target="_blank">Open</a> |
-                  <button @click="copyLink(order.drive_link)">Copy</button>
-                </p>
-                <p><strong>Executive:</strong> {{ order.executive }}</p>
-              </div>
-            </div>
-          </div>
-          <div v-if="activeTab === 'billers'" class="tab-panel">
-            <div class="table-responsive">
-              <div class="desktop-view">
-                <table>
-                  <thead>
-                    <tr>
-                      <th>Name</th>
-                      <th>Credit Duration</th>
-                      <th>Account No</th>
-                      <th>IFSC</th>
-                      <th>Bank Name</th>
-                      <th>Branch</th>
-                      <th>Executive</th>
-                      <th>Action</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr v-for="biller in billers" :key="biller.id">
-                      <td>{{ biller.name }}</td>
-                      <td>{{ biller.creditDuration }}</td>
-                      <td>{{ biller.accountNo }}</td>
-                      <td>{{ biller.ifsc }}</td>
-                      <td>{{ biller.bankName }}</td>
-                      <td>{{ biller.branch }}</td>
-                      <td>{{ biller.executive }}</td>
-                      <td class="action-cell">
-                        <button
-                          class="action-button"
-                          @click="editBiller(biller)"
-                        >
-                          Edit Biller
-                        </button>
-                      </td>
-                    </tr>
-                  </tbody>
-                </table>
-              </div>
-            </div>
-            <div class="mobile-view">
-              <div v-for="biller in billers" :key="biller.id" class="card">
-                <h3>{{ biller.name }}</h3>
-                <p>
-                  <strong>Credit Duration:</strong> {{ biller.creditDuration }}
-                </p>
-                <p><strong>Account No:</strong> {{ biller.accountNo }}</p>
-                <p><strong>IFSC:</strong> {{ biller.ifsc }}</p>
-                <p><strong>Bank Name:</strong> {{ biller.bankName }}</p>
-                <p><strong>Branch:</strong> {{ biller.branch }}</p>
-                <p><strong>Executive:</strong> {{ biller.executive }}</p>
-                <div class="action-buttons">
-                  <button class="action-button" @click="editBiller(biller)">
-                    Edit Biller
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-          <div v-if="activeTab === 'pdf'" class="tab-panel">
-            <div class="pdf-container">
-              <div v-if="isLoading" class="saving-overlay">
-                <div class="loader"></div>
-                Generating PDF...
-              </div>
-              <h2 class="pdf-title">PDF Generator</h2>
-              <div class="card">
-                <label class="form-label">Select Brands</label>
-                <select multiple v-model="selectedBrands" class="form-select">
-                  <option v-for="brand in brands" :key="brand" :value="brand">
-                    {{ brand }}
-                  </option>
-                </select>
-              </div>
-              <div class="card">
-                <label class="checkbox-label">
-                  <input type="checkbox" v-model="onlyWithPhotos" />
-                  Only include products with photos
-                </label>
-              </div>
-              <div class="card">
-                <label class="checkbox-label">
-                  <input type="checkbox" v-model="minQtyEnabled" />
-                  Only include articles with more than
-                </label>
-                <div class="flex items-center mt-2 gap-2">
-                  <input
-                    type="number"
-                    v-model="minQty"
-                    :disabled="!minQtyEnabled"
-                    class="form-input"
-                    min="0"
-                  />
-                  <span class="text-sm font-medium">quantity</span>
-                </div>
-              </div>
-              <button
-                @click="generatePdf"
-                class="action-button w-full"
-                :disabled="isLoading"
-              >
-                Generate PDF
-              </button>
-            </div>
-          </div>
+          <Dues
+            v-if="activeTab === 'dues'"
+            :bills="bills"
+            :billers="billers"
+            :is-mobile="isMobile"
+            @edit-bill="editBill"
+            @mark-paid="markPaid"
+            @mark-unpaid="markUnpaid"
+            @show-bank-info="showBankInfo"
+          />
+          <Orders
+            v-if="activeTab === 'orders'"
+            :orders="orders"
+            :is-mobile="isMobile"
+            @copy-link="copyLink"
+          />
+          <Billers
+            v-if="activeTab === 'billers'"
+            :billers="billers"
+            :is-mobile="isMobile"
+            @edit-biller="editBiller"
+          />
+          <PdfGenerator
+            v-if="activeTab === 'pdf'"
+            :brands="brands"
+            :is-loading="isLoading"
+            @generate-pdf="generatePdf"
+          />
         </div>
       </div>
 
@@ -684,8 +375,18 @@
 <script>
 import { supabase } from "./utils/supabase";
 import axios from "axios";
+import Dues from "./components/Dues.vue";
+import Orders from "./components/Orders.vue";
+import Billers from "./components/Billers.vue";
+import PdfGenerator from "./components/PdfGenerator.vue";
 
 export default {
+  components: {
+    Dues,
+    Orders,
+    Billers,
+    PdfGenerator,
+  },
   data() {
     return {
       activeTab: "dues",
@@ -693,15 +394,7 @@ export default {
       orders: [],
       billers: [],
       brands: [],
-      selectedBrands: [],
-      onlyWithPhotos: true,
-      minQtyEnabled: false,
-      minQty: 6,
-      fromDate: "",
-      toDate: "",
-      searchQuery: "",
-      sortColumn: "due_date",
-      sortDirection: "asc",
+      isLoading: false,
       showBillPopup: false,
       showOrderPopup: false,
       showConfirmPopup: false,
@@ -710,9 +403,6 @@ export default {
       editBillMode: false,
       editBillerMode: false,
       saving: false,
-      isLoading: false,
-      showPaid: false,
-      showUnpaid: true,
       newBill: {
         biller: "",
         billing_date: "",
@@ -746,56 +436,6 @@ export default {
       errors: {},
       toast: { message: "", type: "" },
     };
-  },
-  computed: {
-    filteredBills() {
-      let filtered = this.bills;
-
-      // Apply status filter
-      if (this.showPaid && !this.showUnpaid) {
-        filtered = filtered.filter((bill) => bill.is_paid);
-      } else if (this.showUnpaid && !this.showPaid) {
-        filtered = filtered.filter((bill) => !bill.is_paid);
-      } else if (!this.showPaid && !this.showUnpaid) {
-        filtered = [];
-      }
-
-      // Apply search filter
-      if (this.searchQuery) {
-        const query = this.searchQuery.toLowerCase();
-        filtered = filtered.filter((bill) =>
-          Object.values(bill).some(
-            (value) => value && value.toString().toLowerCase().includes(query)
-          )
-        );
-      }
-
-      // Apply date filters
-      if (this.fromDate) {
-        filtered = filtered.filter(
-          (bill) => new Date(bill.billing_date) >= new Date(this.fromDate)
-        );
-      }
-      if (this.toDate) {
-        filtered = filtered.filter(
-          (bill) => new Date(bill.billing_date) <= new Date(this.toDate)
-        );
-      }
-
-      // Sort the filtered results
-      return filtered.sort((a, b) => {
-        let valA = a[this.sortColumn];
-        let valB = b[this.sortColumn];
-        if (this.sortColumn === "amount") {
-          valA = parseFloat(valA);
-          valB = parseFloat(valB);
-        } else {
-          valA = new Date(valA);
-          valB = new Date(valB);
-        }
-        return this.sortDirection === "asc" ? valA - valB : valB - valA;
-      });
-    },
   },
   watch: {
     "newBill.biller"(newVal) {
@@ -880,16 +520,12 @@ export default {
       }
     },
     async generatePdf() {
-      if (this.selectedBrands.length === 0) {
+      const payload = this.$refs.pdfGenerator?.getPayload();
+      if (!payload || payload.brands.length === 0) {
         this.showToast("Please select at least one brand", "error");
         return;
       }
       this.isLoading = true;
-      const payload = {
-        brands: this.selectedBrands,
-        onlyWithPhotos: this.onlyWithPhotos,
-        minQty: this.minQtyEnabled ? this.minQty : -1,
-      };
       try {
         const response = await axios.post(
           "http://localhost:3001/generate-pdf",
@@ -912,45 +548,6 @@ export default {
       } finally {
         this.isLoading = false;
       }
-    },
-    sortBy(column) {
-      if (this.sortColumn === column) {
-        this.sortDirection = this.sortDirection === "asc" ? "desc" : "asc";
-      } else {
-        this.sortColumn = column;
-        this.sortDirection = "asc";
-      }
-    },
-    formatIndianDate(date) {
-      const d = new Date(date);
-      const day = d.getDate().toString().padStart(2, "0");
-      const month = (d.getMonth() + 1).toString().padStart(2, "0");
-      const year = d.getFullYear();
-      return `${day}/${month}/${year}`;
-    },
-    formatIndianCurrency(amount) {
-      return new Intl.NumberFormat("en-IN", {
-        style: "currency",
-        currency: "INR",
-      }).format(amount);
-    },
-    getDueInDays(bill) {
-      if (bill.is_paid) {
-        return `Paid on ${this.formatIndianDate(bill.paid_on)}`;
-      }
-      const dueDate = new Date(bill.due_date);
-      const today = new Date();
-      const diff = Math.ceil((dueDate - today) / (1000 * 60 * 60 * 24));
-      return diff > 0 ? `${diff} days` : `${Math.abs(diff)} days overdue`;
-    },
-    getStatus(bill) {
-      if (bill.is_paid) return "Paid";
-      const days = Math.ceil(
-        (new Date(bill.due_date) - new Date()) / (1000 * 60 * 60 * 24)
-      );
-      if (days < 0) return "Overdue";
-      if (days <= 7) return "Due Soon";
-      return "Pending";
     },
     openBillPopup() {
       this.editBillMode = false;

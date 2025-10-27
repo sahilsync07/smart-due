@@ -149,7 +149,6 @@ select {
 }
 
 select[multiple] {
-    height: 200px;
     background-image: none;
 }
 
@@ -177,52 +176,6 @@ select option {
     max-width: 100%;
     margin: 0;
     animation: fadeIn 0.33s cubic-bezier(0.44, 0, 0.63, 1);
-}
-
-.controls-container {
-    margin-bottom: 1rem;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    flex-wrap: wrap;
-    gap: 1rem;
-}
-
-.dues-controls {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-}
-
-.date-filter-group {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-}
-
-.date-filter-group span {
-    padding: 0 0.5rem;
-}
-
-.status-filter-group {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-}
-
-.checkbox-label {
-    display: flex;
-    align-items: center;
-    font-size: 1rem;
-    color: var(--text-main);
-    cursor: pointer;
-}
-
-.checkbox-label input[type="checkbox"] {
-    margin-right: 0.5rem;
-    width: 1.2rem;
-    height: 1.2rem;
-    accent-color: var(--primary);
 }
 
 .tab-container {
@@ -284,131 +237,29 @@ select option {
     animation: fadeIn 0.3s ease-in-out;
 }
 
-.table-responsive {
-    width: 100%;
-    overflow-x: auto;
-    overflow-y: auto;
-}
-
-table {
-    width: 100%;
-    border-collapse: separate;
-    border-spacing: 0 6px;
-    margin: 0;
-    table-layout: auto;
-}
-
-thead {
-    background: #f4f5fa;
-}
-
-th,
-td {
-    padding: 0.91rem 1rem;
-    font-size: 1rem;
-    text-align: left;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    color: var(--text-main);
-}
-
-td {
-    border-bottom: 1px solid #f2f3f6;
-    background: var(--surface);
-    transition: background 0.18s;
-}
-
-tr:hover td {
-    background: #f5f7fd;
-}
-
-.paid-row {
-    background-color: rgba(0, 255, 0, 0.1);
-}
-
-.paid-card {
-    background-color: rgba(0, 255, 0, 0.1);
-}
-
-.biller {
-    white-space: normal !important;
-    word-wrap: break-word;
-}
-
-.action-cell {
-    display: flex;
-    justify-content: flex-start;
-    align-items: center;
-}
-
-.action-buttons {
-    display: flex;
-    gap: 0.5rem;
-}
-
-.action-button {
-    flex: 1;
-    min-width: 100px;
-    text-align: center;
-    padding: 0.5rem 1rem;
-    white-space: nowrap;
-    border-radius: var(--radius);
-    border: none;
-    cursor: pointer;
-    transition: transform 0.12s;
+.new-button {
+    position: fixed;
+    bottom: 2rem;
+    right: 2rem;
     background: var(--primary);
-    color: #fff;
-}
-
-.action-button:hover:not(:disabled) {
-    transform: translateY(-1px) scale(1.015);
-    background: var(--accent);
-}
-
-.copy-button {
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 3.5rem;
+    height: 3.5rem;
+    font-size: 2rem;
+    cursor: pointer;
+    box-shadow: var(--shadow);
+    z-index: 50;
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 100px;
-    padding: 0.4rem 0.8rem;
-    font-size: 0.9rem;
+    transition: background 0.2s, transform 0.12s;
 }
 
-.bank-details-table {
-    width: 100%;
-    border-collapse: collapse;
-}
-
-.bank-details-table tr {
-    border-bottom: 1px solid var(--border-color);
-}
-
-.bank-details-table tr:last-child {
-    border-bottom: none;
-}
-
-.bank-details-table td {
-    padding: 0.5rem;
-    vertical-align: middle;
-}
-
-.bank-details-table .label {
-    width: 30%;
-    font-weight: 500;
-    color: var(--text-main);
-    text-align: left;
-}
-
-.bank-details-table .value {
-    width: 50%;
-    text-align: left;
-    color: var(--text-main);
-}
-
-.bank-details-table .copy {
-    width: 20%;
-    text-align: right;
+.new-button:hover {
+    background: var(--accent);
+    transform: scale(1.1);
 }
 
 .popup {
@@ -459,160 +310,60 @@ tr:hover td {
     gap: 0.75rem;
 }
 
-.new-button {
-    position: fixed;
-    bottom: 2rem;
-    right: 2rem;
-    background: var(--primary);
-    color: white;
-    border: none;
-    border-radius: 50%;
-    width: 3.5rem;
-    height: 3.5rem;
-    font-size: 2rem;
-    cursor: pointer;
-    box-shadow: var(--shadow);
-    z-index: 50;
+.copy-button {
     display: flex;
     align-items: center;
     justify-content: center;
+    width: 100px;
+    padding: 0.4rem 0.8rem;
+    font-size: 0.9rem;
+    background: var(--primary);
+    color: #fff;
+    border: none;
+    border-radius: var(--radius);
+    cursor: pointer;
     transition: background 0.2s, transform 0.12s;
 }
 
-.new-button:hover {
+.copy-button:hover {
     background: var(--accent);
-    transform: scale(1.1);
+    transform: translateY(-1px) scale(1.015);
 }
 
-.search-bar {
-    width: 200px;
+.bank-details-table {
+    width: 100%;
+    border-collapse: collapse;
 }
 
-.card {
-    background: var(--surface);
-    border-radius: var(--radius);
-    box-shadow: var(--shadow);
-    padding: 1rem;
-    margin-bottom: 1rem;
+.bank-details-table tr {
+    border-bottom: 1px solid var(--border-color);
 }
 
-.card h3 {
-    margin-top: 0;
-    font-size: 1.1rem;
-    color: var(--primary);
+.bank-details-table tr:last-child {
+    border-bottom: none;
 }
 
-.card p {
-    margin: 0.5rem 0;
-    font-size: 0.9rem;
+.bank-details-table td {
+    padding: 0.5rem;
+    vertical-align: middle;
 }
 
-.card p strong {
-    color: var(--text-main);
-}
-
-.desktop-view {
-    display: block;
-}
-
-.mobile-view {
-    display: none;
-}
-
-.mobile-sort-buttons {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.5rem;
-    margin-bottom: 1rem;
-    justify-content: center;
-}
-
-.mobile-sort-buttons button {
-    background: var(--primary);
-    color: #fff;
-    padding: 0.5rem 1rem;
-    border-radius: var(--radius);
-    font-size: 0.9rem;
-}
-
-.mobile-sort-buttons button:hover {
-    background: var(--accent);
-}
-
-.pdf-container {
-    max-width: 600px;
-    margin: 0 auto;
-}
-
-.pdf-title {
-    font-size: 1.5rem;
-    font-weight: 700;
-    color: var(--primary);
-    text-align: center;
-    margin-bottom: 1.5rem;
-}
-
-.form-label {
-    font-size: 1rem;
+.bank-details-table .label {
+    width: 30%;
     font-weight: 500;
     color: var(--text-main);
-    display: block;
-    margin-bottom: 0.5rem;
+    text-align: left;
 }
 
-.form-select {
-    padding: 0.6rem 1rem;
-    border: 1.2px solid var(--border-color);
-    border-radius: var(--radius);
-    font-size: 1rem;
-    background: var(--surface);
+.bank-details-table .value {
+    width: 50%;
+    text-align: left;
     color: var(--text-main);
-    width: 100%;
-    height: 200px;
-    transition: border-color 0.13s, box-shadow 0.13s;
 }
 
-.form-select:focus {
-    border-color: var(--primary);
-    box-shadow: 0 0 5px rgba(99, 102, 241, 0.3);
-    outline: none;
-}
-
-.form-input {
-    padding: 0.6rem 1rem;
-    border: 1.2px solid var(--border-color);
-    border-radius: var(--radius);
-    font-size: 1rem;
-    background: var(--surface);
-    color: var(--text-main);
-    width: 100px;
-    transition: border-color 0.13s, box-shadow 0.13s;
-}
-
-.form-input:focus {
-    border-color: var(--primary);
-    box-shadow: 0 0 5px rgba(99, 102, 241, 0.3);
-    outline: none;
-}
-
-/* Scrollbar styles */
-::-webkit-scrollbar {
-    width: 8px;
-    height: 8px;
-}
-
-::-webkit-scrollbar-track {
-    background: #f1f1f1;
-    border-radius: 10px;
-}
-
-::-webkit-scrollbar-thumb {
-    background: var(--primary);
-    border-radius: 10px;
-}
-
-::-webkit-scrollbar-thumb:hover {
-    background: var(--accent);
+.bank-details-table .copy {
+    width: 20%;
+    text-align: right;
 }
 
 .saving-overlay {
@@ -742,58 +493,6 @@ tr:hover td {
         font-size: 1.5rem;
     }
 
-    .controls-container {
-        flex-direction: row;
-        flex-wrap: wrap;
-        justify-content: center;
-        gap: 0.5rem;
-    }
-
-    .dues-controls {
-        flex-direction: row;
-        gap: 0.5rem;
-        width: 100%;
-        justify-content: center;
-    }
-
-    .date-filter-group {
-        flex: 1;
-        justify-content: center;
-    }
-
-    .status-filter-group {
-        flex: 1;
-        justify-content: center;
-    }
-
-    .search-bar {
-        flex: 1;
-        width: auto;
-        max-width: 150px;
-    }
-
-    .desktop-view {
-        display: none;
-    }
-
-    .mobile-view {
-        display: block;
-    }
-
-    .action-buttons {
-        flex-direction: row;
-        flex-wrap: wrap;
-        gap: 0.5rem;
-        justify-content: center;
-    }
-
-    .action-button {
-        min-width: 0;
-        flex: 1 1 100px;
-        padding: 0.5rem;
-        font-size: 0.9rem;
-    }
-
     .container {
         padding: 0.5rem;
     }
@@ -860,63 +559,10 @@ tr:hover td {
         flex: 0 1 auto;
         min-width: 80px;
     }
-
-    .pdf-container {
-        max-width: 100%;
-    }
-
-    .form-select {
-        height: 150px;
-    }
-
-    .form-input {
-        width: 80px;
-    }
 }
 
 @media (min-width: 901px) {
-    .desktop-view {
-        display: block;
-    }
-
-    .mobile-view {
-        display: none;
-    }
-
-    .segmented-control {
-        justify-content: flex-start;
-    }
-
-    .date-filter-group {
-        justify-content: flex-end;
-    }
-
-    .status-filter-group {
-        justify-content: center;
-    }
-
-    .search-bar {
-        margin: 0 auto;
-    }
-
     .tab-buttons {
         justify-content: flex-start;
-    }
-
-    .dues-controls {
-        width: 100%;
-        justify-content: space-between;
-    }
-
-    .date-filter-group {
-        order: 1;
-    }
-
-    .status-filter-group {
-        order: 2;
-    }
-
-    .search-bar {
-        order: 3;
     }
 }
