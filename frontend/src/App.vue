@@ -4,7 +4,7 @@
     <aside class="sidebar" :class="{ 'open': isSidebarOpen, 'collapsed': isSidebarCollapsed && !isMobile }">
       <div class="sidebar-header">
         <div class="brand">
-          <div class="logo-icon">AN</div>
+          <div class="logo-icon">{{ companyInitials }}</div>
           <div class="brand-text">
             <h1>Admin Nexus</h1>
             <select v-model="selectedCompany" class="brand-select">
@@ -70,10 +70,10 @@
 
       <div class="sidebar-footer">
         <div class="user-info">
-          <div class="avatar">A</div>
+          <div class="avatar">S</div>
           <div class="user-details">
-            <span class="name">Admin User</span>
-            <span class="role">Manager</span>
+            <span class="name">Sahil Kumar</span>
+            <span class="role">Managing Director</span>
           </div>
         </div>
       </div>
@@ -419,7 +419,16 @@ export default {
       if (this.activeTab === 'billers') return 'Biller Directory';
       if (this.activeTab === 'pdf') return 'PDF Catalog Generator';
       return '';
-    }
+    },
+    companyInitials() {
+      if (!this.selectedCompany) return "AN";
+      return this.selectedCompany
+        .split(" ")
+        .map((word) => word[0])
+        .join("")
+        .substring(0, 2)
+        .toUpperCase();
+    },
   },
   watch: {
     "newBill.biller"(newVal) {
@@ -435,10 +444,12 @@ export default {
     selectedCompany(newVal) {
       localStorage.setItem("selectedCompany", newVal);
       this.fetchData();
+      this.applyTheme();
       this.showToast(`Switched to ${newVal}`, "info");
     },
   },
   async mounted() {
+    this.applyTheme();
     await this.fetchData();
     window.addEventListener("resize", this.handleResize);
   },
@@ -719,6 +730,28 @@ export default {
       setTimeout(() => {
         this.toast = { message: "", type: "" };
       }, 3000);
+    },
+    applyTheme() {
+      const themes = {
+        "Shree Footwear": {
+          primary: "#0f766e",
+          hover: "#0d9488",
+          light: "#ccfbf1",
+        },
+        "Sri Brundabana Enterprises": {
+          primary: "#4f46e5", // Indigo 600
+          hover: "#4338ca",   // Indigo 700
+          light: "#e0e7ff",   // Indigo 100
+        },
+      };
+
+      const theme = themes[this.selectedCompany] || themes["Shree Footwear"];
+      const root = document.documentElement;
+      root.style.setProperty("--primary", theme.primary);
+      root.style.setProperty("--primary-hover", theme.hover);
+      root.style.setProperty("--primary-light", theme.light);
+      // We can also update the border focus color to match
+      root.style.setProperty("--border-focus", theme.primary);
     },
   },
 };
