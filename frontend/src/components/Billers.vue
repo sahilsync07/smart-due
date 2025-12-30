@@ -111,17 +111,23 @@ export default {
 
 /* Mobile specific overrides */
 @media (max-width: 900px) {
-    font-size: 0.9rem;
-  }
+    .hide-on-mobile { display: none; }
+    .mobile-view { display: block; }
+
+    .grid-details {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1rem;
+    }
+    .detail-item {
+        display: flex;
+        flex-direction: column;
+    }
+    .detail-item .label {
+        font-size: 0.75rem; color: var(--text-secondary);
+    }
 }
-
 @media (min-width: 901px) {
-  .desktop-view {
-    display: block;
-  }
-
-  .mobile-view {
-    display: none;
-  }
+    .mobile-view { display: none; }
 }
 </style>
