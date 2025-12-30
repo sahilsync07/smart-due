@@ -294,8 +294,8 @@ table {
 
 th {
     text-align: left;
-    padding: 0.75rem 1rem;
-    /* Compact padding */
+    padding: 0.5rem 0.66rem;
+    /* Reduced by ~1/3 */
     font-size: 0.75rem;
     font-weight: 600;
     text-transform: uppercase;
@@ -306,8 +306,8 @@ th {
 }
 
 td {
-    padding: 0.75rem 1rem;
-    /* Compact padding */
+    padding: 0.5rem 0.66rem;
+    /* Reduced by ~1/3 */
     font-size: 0.875rem;
     color: var(--text-main);
     border-bottom: 1px solid var(--border);
@@ -320,6 +320,25 @@ tr:last-child td {
 
 tr:hover td {
     background-color: var(--bg-subtle);
+}
+
+/* Specific column width utilities for tighter packing */
+.col-tight {
+    width: 1%;
+    white-space: nowrap;
+}
+
+.col-date {
+    width: 100px;
+}
+
+.col-status {
+    width: 100px;
+}
+
+.col-amount {
+    width: 120px;
+    text-align: right;
 }
 
 /* --- Badges --- */

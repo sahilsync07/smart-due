@@ -32,16 +32,16 @@
         <thead>
           <tr>
             <th>Biller</th>
-            <th @click="sortBy('billing_date')" class="sortable">
+            <th @click="sortBy('billing_date')" class="sortable col-date">
               Billing Date <span v-if="sortColumn === 'billing_date'">{{ sortDirection === "asc" ? "↑" : "↓" }}</span>
             </th>
-            <th @click="sortBy('amount')" class="sortable">
+            <th @click="sortBy('amount')" class="sortable col-amount">
               Amount <span v-if="sortColumn === 'amount'">{{ sortDirection === "asc" ? "↑" : "↓" }}</span>
             </th>
-            <th @click="sortBy('due_date')" class="sortable">
+            <th @click="sortBy('due_date')" class="sortable col-date">
               Due Date <span v-if="sortColumn === 'due_date'">{{ sortDirection === "asc" ? "↑" : "↓" }}</span>
             </th>
-            <th>Status</th>
+            <th class="col-status">Status</th>
             <th>Executive</th>
             <th class="text-right">Actions</th>
           </tr>
