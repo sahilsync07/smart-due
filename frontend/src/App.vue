@@ -2,8 +2,8 @@
   <div>
     <header>
       <div class="header-content">
-        <h1>Smart Due</h1>
-        <span class="sbe-text">Sri Brundabana Enterprises</span>
+        <h1>Admin Nexus</h1>
+        <span class="sbe-text">Shree Footwear</span>
       </div>
     </header>
 
