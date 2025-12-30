@@ -7,7 +7,11 @@
           <div class="logo-icon">AN</div>
           <div class="brand-text">
             <h1>Admin Nexus</h1>
-            <span>Shree Footwear</span>
+            <select v-model="selectedCompany" class="brand-select">
+              <option v-for="company in companies" :key="company" :value="company">
+                {{ company }}
+              </option>
+            </select>
           </div>
         </div>
         <!-- Collapse Toggle (Desktop Only) -->
@@ -334,7 +338,7 @@
 </template>
 
 <script>
-import { supabase } from "./utils/supabase";
+import { getSupabase } from "./utils/supabase";
 import axios from "axios";
 import Dues from "./components/Dues.vue";
 import Orders from "./components/Orders.vue";
@@ -394,9 +398,14 @@ export default {
       isMobile: window.innerWidth <= 900,
       errors: {},
       toast: { message: "", type: "" },
+      companies: ["Shree Footwear", "Sri Brundabana Enterprises"],
+      selectedCompany: localStorage.getItem("selectedCompany") || "Shree Footwear",
     };
   },
   computed: {
+    db() {
+      return getSupabase(this.selectedCompany);
+    },
     currentTabComponent() {
       if (this.activeTab === 'dues') return 'Dues';
       if (this.activeTab === 'orders') return 'Orders';
@@ -422,6 +431,11 @@ export default {
     },
     "newBill.billing_date"() {
       this.calculateDueDate();
+    },
+    selectedCompany(newVal) {
+      localStorage.setItem("selectedCompany", newVal);
+      this.fetchData();
+      this.showToast(`Switched to ${newVal}`, "info");
     },
   },
   async mounted() {
@@ -473,7 +487,7 @@ export default {
       this.isLoading = false;
     },
     async fetchBills() {
-      const { data, error } = await supabase.from("dues").select("*");
+      const { data, error } = await this.db.from("dues").select("*");
       if (error) {
         console.error("Error fetching bills:", error);
         return;
@@ -481,7 +495,7 @@ export default {
       this.bills = data || [];
     },
     async fetchOrders() {
-      const { data, error } = await supabase.from("orders").select("*");
+      const { data, error } = await this.db.from("orders").select("*");
       if (error) {
         console.error("Error fetching orders:", error);
         return;
@@ -489,7 +503,7 @@ export default {
       this.orders = data || [];
     },
     async fetchBillers() {
-      const { data, error } = await supabase.from("billers").select("*");
+      const { data, error } = await this.db.from("billers").select("*");
       if (error) {
         console.error("Error fetching billers:", error);
         return;
@@ -547,12 +561,12 @@ export default {
       this.saving = true;
       let error;
       if (this.editBillMode) {
-        ({ error } = await supabase
+        ({ error } = await this.db
           .from("dues")
           .update(this.newBill)
           .eq("id", this.newBill.id));
       } else {
-        ({ error } = await supabase.from("dues").insert(this.newBill));
+        ({ error } = await this.db.from("dues").insert(this.newBill));
       }
       this.saving = false;
       if (error) {
@@ -572,7 +586,7 @@ export default {
     },
     async markPaid(bill) {
       const today = new Date().toISOString().split("T")[0];
-      const { error } = await supabase
+      const { error } = await this.db
         .from("dues")
         .update({ is_paid: true, paid_on: today })
         .eq("id", bill.id);
@@ -584,7 +598,7 @@ export default {
       await this.fetchBills();
     },
     async markUnpaid(bill) {
-      const { error } = await supabase
+      const { error } = await this.db
         .from("dues")
         .update({ is_paid: false, paid_on: null })
         .eq("id", bill.id);
@@ -636,7 +650,7 @@ export default {
     },
     async saveOrder() {
       this.saving = true;
-      const { error } = await supabase.from("orders").insert(this.newOrder);
+      const { error } = await this.db.from("orders").insert(this.newOrder);
       this.saving = false;
       if (error) {
         this.showToast("Error saving order", "error");
@@ -679,12 +693,12 @@ export default {
       this.saving = true;
       let error;
       if (this.editBillerMode) {
-        ({ error } = await supabase
+        ({ error } = await this.db
           .from("billers")
           .update(this.newBiller)
           .eq("id", this.newBiller.id));
       } else {
-        ({ error } = await supabase.from("billers").insert(this.newBiller));
+        ({ error } = await this.db.from("billers").insert(this.newBiller));
       }
       this.saving = false;
       if (error) {
@@ -750,6 +764,21 @@ export default {
 }
 .brand-text h1 { font-size: 1rem; margin: 0; }
 .brand-text span { font-size: 0.75rem; color: var(--text-secondary); display: block; }
+.brand-select {
+  border: none;
+  background: transparent;
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  padding: 0;
+  margin: 0;
+  cursor: pointer;
+  width: 100%;
+  font-family: inherit;
+}
+.brand-select:focus {
+  outline: none;
+  color: var(--primary);
+}
 
 .sidebar-nav { padding: 1.5rem 1rem; flex: 1; }
 .nav-item {
