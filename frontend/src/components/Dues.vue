@@ -1,168 +1,131 @@
 <template>
   <div class="tab-panel">
-    <div class="controls-container">
-      <div class="date-filter-group">
-        <input type="date" v-model="fromDate" placeholder="From" />
-        <span>to</span>
-        <input type="date" v-model="toDate" placeholder="To" />
-      </div>
-      <div class="status-filter-group">
-        <label class="checkbox-label">
-          <input type="checkbox" v-model="showUnpaid" />
-          Show Unpaid
-        </label>
-        <label class="checkbox-label">
-          <input type="checkbox" v-model="showPaid" />
-          Show Paid
-        </label>
-      </div>
-      <input
-        type="text"
-        v-model="searchQuery"
-        placeholder="Search"
-        class="search-bar"
-      />
-    </div>
-    <div class="mobile-sort-buttons" v-if="isMobile">
-      <button @click="sortBy('billing_date')">
-        Bill
-        {{
-          sortColumn === "billing_date"
-            ? sortDirection === "asc"
-              ? "↑"
-              : "↓"
-            : ""
-        }}
-      </button>
-      <button @click="sortBy('amount')">
-        Amount
-        {{
-          sortColumn === "amount" ? (sortDirection === "asc" ? "↑" : "↓") : ""
-        }}
-      </button>
-      <button @click="sortBy('due_date')">
-        Due
-        {{
-          sortColumn === "due_date" ? (sortDirection === "asc" ? "↑" : "↓") : ""
-        }}
-      </button>
-    </div>
-    <div class="table-responsive">
-      <div class="desktop-view">
-        <table>
-          <thead>
-            <tr>
-              <th class="biller">Biller</th>
-              <th @click="sortBy('billing_date')">
-                Billing Date
-                <span v-if="sortColumn === 'billing_date'">{{
-                  sortDirection === "asc" ? "↑" : "↓"
-                }}</span>
-              </th>
-              <th @click="sortBy('amount')">
-                Amount
-                <span v-if="sortColumn === 'amount'">{{
-                  sortDirection === "asc" ? "↑" : "↓"
-                }}</span>
-              </th>
-              <th @click="sortBy('due_date')">
-                Due Date
-                <span v-if="sortColumn === 'due_date'">{{
-                  sortDirection === "asc" ? "↑" : "↓"
-                }}</span>
-              </th>
-              <th>Due In</th>
-              <th>Status</th>
-              <th>Executive</th>
-              <th>Action</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr
-              v-for="bill in filteredBills"
-              :key="bill.id"
-              :class="{ 'paid-row': bill.is_paid }"
-            >
-              <td class="biller">{{ bill.biller }}</td>
-              <td>{{ formatIndianDate(bill.billing_date) }}</td>
-              <td>{{ formatIndianCurrency(bill.amount) }}</td>
-              <td>{{ formatIndianDate(bill.due_date) }}</td>
-              <td>{{ getDueInDays(bill) }}</td>
-              <td>{{ getStatus(bill) }}</td>
-              <td>{{ bill.executive }}</td>
-              <td class="action-cell">
-                <div class="action-buttons">
-                  <button
-                    class="action-button"
-                    @click="$emit('edit-bill', bill)"
-                  >
-                    Edit Bill
-                  </button>
-                  <button
-                    v-if="!bill.is_paid"
-                    class="action-button"
-                    @click="$emit('mark-paid', bill)"
-                  >
-                    Mark Paid
-                  </button>
-                  <button
-                    v-if="bill.is_paid"
-                    class="action-button"
-                    @click="$emit('mark-unpaid', bill)"
-                  >
-                    Mark Unpaid
-                  </button>
-                  <button
-                    class="action-button"
-                    @click="$emit('show-bank-info', bill)"
-                  >
-                    Bank Info
-                  </button>
-                </div>
-              </td>
-            </tr>
-          </tbody>
-        </table>
+    <!-- Filters Card -->
+    <div class="card mb-4">
+      <div class="card-body">
+        <div class="filter-row">
+            <div class="filter-group">
+                <input type="text" v-model="searchQuery" placeholder="Search bills..." class="form-control" />
+            </div>
+            
+            <div class="filter-group date-range">
+                <input type="date" v-model="fromDate" class="form-control" placeholder="From" />
+                <span class="text-muted">to</span>
+                <input type="date" v-model="toDate" class="form-control" placeholder="To" />
+            </div>
+
+            <div class="filter-group checkboxes">
+                <label class="custom-checkbox">
+                    <input type="checkbox" v-model="showUnpaid" /> <span>Unpaid</span>
+                </label>
+                <label class="custom-checkbox">
+                    <input type="checkbox" v-model="showPaid" /> <span>Paid</span>
+                </label>
+            </div>
+        </div>
       </div>
     </div>
+
+    <!-- Desktop Table -->
+    <div class="table-container hide-on-mobile">
+      <table>
+        <thead>
+          <tr>
+            <th>Biller</th>
+            <th @click="sortBy('billing_date')" class="sortable">
+              Billing Date <span v-if="sortColumn === 'billing_date'">{{ sortDirection === "asc" ? "↑" : "↓" }}</span>
+            </th>
+            <th @click="sortBy('amount')" class="sortable">
+              Amount <span v-if="sortColumn === 'amount'">{{ sortDirection === "asc" ? "↑" : "↓" }}</span>
+            </th>
+            <th @click="sortBy('due_date')" class="sortable">
+              Due Date <span v-if="sortColumn === 'due_date'">{{ sortDirection === "asc" ? "↑" : "↓" }}</span>
+            </th>
+            <th>Status</th>
+            <th>Executive</th>
+            <th class="text-right">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr v-for="bill in filteredBills" :key="bill.id">
+            <td class="font-medium">{{ bill.biller }}</td>
+            <td>{{ formatIndianDate(bill.billing_date) }}</td>
+            <td class="font-bold">{{ formatIndianCurrency(bill.amount) }}</td>
+            <td>
+                <div>{{ formatIndianDate(bill.due_date) }}</div>
+                <small class="text-muted">{{ getDueInDays(bill) }}</small>
+            </td>
+            <td>
+              <span class="badge" :class="getStatusBadgeClass(bill)">
+                {{ getStatus(bill) }}
+              </span>
+            </td>
+            <td>{{ bill.executive }}</td>
+            <td class="text-right">
+              <div class="action-group">
+                <button class="btn btn-secondary btn-icon" @click="$emit('edit-bill', bill)" title="Edit">
+                  ✏️
+                </button>
+                <button 
+                  v-if="!bill.is_paid" 
+                  class="btn btn-primary btn-icon" 
+                  @click="$emit('mark-paid', bill)" 
+                  title="Mark Paid"
+                >
+                  ✅
+                </button>
+                <button 
+                  v-if="bill.is_paid" 
+                  class="btn btn-secondary btn-icon" 
+                  @click="$emit('mark-unpaid', bill)" 
+                  title="Mark Unpaid"
+                >
+                  ↩️
+                </button>
+                <button class="btn btn-secondary btn-icon" @click="$emit('show-bank-info', bill)" title="Bank Info">
+                  🏦
+                </button>
+              </div>
+            </td>
+          </tr>
+          <tr v-if="filteredBills.length === 0">
+              <td colspan="7" class="text-center py-4">No bills found matching your criteria.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Mobile Cards -->
     <div class="mobile-view">
-      <div
-        v-for="bill in filteredBills"
-        :key="bill.id"
-        class="card"
-        :class="{ 'paid-card': bill.is_paid }"
-      >
-        <h3>{{ bill.biller }}</h3>
-        <p>
-          <strong>Billing Date:</strong>
-          {{ formatIndianDate(bill.billing_date) }}
-        </p>
-        <p><strong>Amount:</strong> {{ formatIndianCurrency(bill.amount) }}</p>
-        <p><strong>Due Date:</strong> {{ formatIndianDate(bill.due_date) }}</p>
-        <p><strong>Due In:</strong> {{ getDueInDays(bill) }}</p>
-        <p><strong>Status:</strong> {{ getStatus(bill) }}</p>
-        <p><strong>Executive:</strong> {{ bill.executive }}</p>
-        <div class="action-buttons">
-          <button class="action-button" @click="$emit('edit-bill', bill)">
-            Edit Bill
-          </button>
-          <button
-            v-if="!bill.is_paid"
-            class="action-button"
-            @click="$emit('mark-paid', bill)"
-          >
-            Mark Paid
-          </button>
-          <button
-            v-if="bill.is_paid"
-            class="action-button"
-            @click="$emit('mark-unpaid', bill)"
-          >
-            Mark Unpaid
-          </button>
-          <button class="action-button" @click="$emit('show-bank-info', bill)">
-            Bank Info
-          </button>
+        <div class="mobile-controls mb-4">
+             <!-- Simplified sort for mobile if needed, or rely on search -->
+        </div>
+      <div v-for="bill in filteredBills" :key="bill.id" class="card mb-4">
+        <div class="card-body">
+            <div class="flex justify-between items-start mb-2">
+                <h3 class="text-lg font-bold">{{ bill.biller }}</h3>
+                <span class="badge" :class="getStatusBadgeClass(bill)">{{ getStatus(bill) }}</span>
+            </div>
+            
+            <div class="grid-details">
+                <div class="detail-item">
+                    <span class="label">Amount</span>
+                    <span class="value font-bold">{{ formatIndianCurrency(bill.amount) }}</span>
+                </div>
+                 <div class="detail-item">
+                    <span class="label">Due Date</span>
+                    <span class="value">{{ formatIndianDate(bill.due_date) }}</span>
+                </div>
+            </div>
+            
+            <p class="text-sm text-muted mt-2">Executive: {{ bill.executive }}</p>
+
+            <div class="mobile-actions mt-4 flex gap-2">
+                <button class="btn btn-secondary flex-1" @click="$emit('edit-bill', bill)">Edit</button>
+                <button v-if="!bill.is_paid" class="btn btn-primary flex-1" @click="$emit('mark-paid', bill)">Paid</button>
+                <button v-if="bill.is_paid" class="btn btn-secondary flex-1" @click="$emit('mark-unpaid', bill)">Unpaid</button>
+                <button class="btn btn-secondary flex-1" @click="$emit('show-bank-info', bill)">Bank</button>
+            </div>
         </div>
       </div>
     </div>
@@ -170,8 +133,6 @@
 </template>
 
 <script>
-import { supabase } from "../utils/supabase";
-
 export default {
   props: {
     bills: Array,
@@ -249,6 +210,7 @@ export default {
       }
     },
     formatIndianDate(date) {
+      if (!date) return '-';
       const d = new Date(date);
       const day = d.getDate().toString().padStart(2, "0");
       const month = (d.getMonth() + 1).toString().padStart(2, "0");
@@ -268,7 +230,7 @@ export default {
       const dueDate = new Date(bill.due_date);
       const today = new Date();
       const diff = Math.ceil((dueDate - today) / (1000 * 60 * 60 * 24));
-      return diff > 0 ? `${diff} days` : `${Math.abs(diff)} days overdue`;
+      return diff > 0 ? `${diff} days left` : `${Math.abs(diff)} days overdue`;
     },
     getStatus(bill) {
       if (bill.is_paid) return "Paid";
@@ -279,246 +241,79 @@ export default {
       if (days <= 7) return "Due Soon";
       return "Pending";
     },
+    getStatusBadgeClass(bill) {
+        const status = this.getStatus(bill);
+        if (status === 'Paid') return 'badge-success';
+        if (status === 'Overdue') return 'badge-danger';
+        if (status === 'Due Soon') return 'badge-warning';
+        return 'badge-info';
+    }
   },
 };
 </script>
 
 <style scoped>
-.controls-container {
-  margin-bottom: 1rem;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 1rem;
-}
-
-.date-filter-group {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-}
-
-.date-filter-group span {
-  padding: 0 0.5rem;
-}
-
-.status-filter-group {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-}
-
-.checkbox-label {
-  display: flex;
-  align-items: center;
-  font-size: 1rem;
-  color: var(--text-main);
-  cursor: pointer;
-}
-
-.checkbox-label input[type="checkbox"] {
-  margin-right: 0.5rem;
-  width: 1.2rem;
-  height: 1.2rem;
-  accent-color: var(--primary);
-}
-
-.search-bar {
-  width: 200px;
-}
-
-.table-responsive {
-  width: 100%;
-  overflow-x: auto;
-  overflow-y: auto;
-}
-
-table {
-  width: 100%;
-  border-collapse: separate;
-  border-spacing: 0 6px;
-  margin: 0;
-  table-layout: auto;
-}
-
-thead {
-  background: #f4f5fa;
-}
-
-th,
-td {
-  padding: 0.91rem 1rem;
-  font-size: 1rem;
-  text-align: left;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  color: var(--text-main);
-}
-
-td {
-  border-bottom: 1px solid #f2f3f6;
-  background: var(--surface);
-  transition: background 0.18s;
-}
-
-tr:hover td {
-  background: #f5f7fd;
-}
-
-.paid-row {
-  background-color: rgba(0, 255, 0, 0.1);
-}
-
-.paid-card {
-  background-color: rgba(0, 255, 0, 0.1);
-}
-
-.biller {
-  white-space: normal !important;
-  word-wrap: break-word;
-}
-
-.action-cell {
-  display: flex;
-  justify-content: flex-start;
-  align-items: center;
-}
-
-.action-buttons {
-  display: flex;
-  gap: 0.5rem;
-}
-
-.action-button {
-  flex: 1;
-  min-width: 100px;
-  text-align: center;
-  padding: 0.5rem 1rem;
-  white-space: nowrap;
-  border-radius: var(--radius);
-  border: none;
-  cursor: pointer;
-  transition: transform 0.12s;
-  background: var(--primary);
-  color: #fff;
-}
-
-.action-button:hover:not(:disabled) {
-  transform: translateY(-1px) scale(1.015);
-  background: var(--accent);
-}
-
-.card {
-  background: var(--surface);
-  border-radius: var(--radius);
-  box-shadow: var(--shadow);
-  padding: 1rem;
-  margin-bottom: 1rem;
-}
-
-.card h3 {
-  margin-top: 0;
-  font-size: 1.1rem;
-  color: var(--primary);
-}
-
-.card p {
-  margin: 0.5rem 0;
-  font-size: 0.9rem;
-}
-
-.card p strong {
-  color: var(--text-main);
-}
-
-.mobile-sort-buttons {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.5rem;
-  margin-bottom: 1rem;
-  justify-content: center;
-}
-
-.mobile-sort-buttons button {
-  background: var(--primary);
-  color: #fff;
-  padding: 0.5rem 1rem;
-  border-radius: var(--radius);
-  font-size: 0.9rem;
-}
-
-.mobile-sort-buttons button:hover {
-  background: var(--accent);
-}
-
-@media (max-width: 900px) {
-  .desktop-view {
-    display: none;
-  }
-
-  .mobile-view {
-    display: block;
-  }
-
-  .action-buttons {
-    flex-direction: row;
+.filter-row {
+    display: flex;
     flex-wrap: wrap;
-    gap: 0.5rem;
-    justify-content: center;
-  }
-
-  .action-button {
-    min-width: 0;
-    flex: 1 1 100px;
-    padding: 0.5rem;
-    font-size: 0.9rem;
-  }
-
-  .controls-container {
-    flex-direction: row;
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: 0.5rem;
-  }
-
-  .date-filter-group {
-    flex: 1;
-    justify-content: center;
-  }
-
-  .status-filter-group {
-    flex: 1;
-    justify-content: center;
-  }
-
-  .search-bar {
-    flex: 1;
-    width: auto;
-    max-width: 150px;
-  }
+    gap: 1.5rem;
+    align-items: center;
 }
+.filter-group {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+.date-range input { width: 150px; }
+.checkboxes { gap: 1.5rem; }
+.custom-checkbox {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    cursor: pointer;
+    font-weight: 500;
+}
+.custom-checkbox input {
+    width: 1.1rem; height: 1.1rem; accent-color: var(--primary);
+}
+.sortable { cursor: pointer; user-select: none; }
+.sortable:hover { color: var(--primary); }
 
-@media (min-width: 901px) {
-  .desktop-view {
-    display: block;
-  }
+.font-medium { font-weight: 500; }
+.font-bold { font-weight: 600; }
+.text-muted { color: var(--text-secondary); }
+.text-center { text-align: center; }
+.py-4 { padding-top: 1rem; padding-bottom: 1rem; }
 
-  .mobile-view {
-    display: none;
-  }
-
-  .date-filter-group {
+.action-group {
+    display: flex;
     justify-content: flex-end;
-  }
+    gap: 0.5rem;
+}
 
-  .status-filter-group {
-    justify-content: center;
-  }
-
-  .search-bar {
-    margin: 0 auto;
-  }
+/* Mobile specific overrides */
+@media (max-width: 900px) {
+    .hide-on-mobile { display: none; }
+    .mobile-view { display: block; }
+    
+    .grid-details {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1rem;
+        margin-top: 0.75rem;
+    }
+    .detail-item {
+        display: flex;
+        flex-direction: column;
+    }
+    .detail-item .label {
+        font-size: 0.75rem; color: var(--text-secondary);
+    }
+    .filter-row { flex-direction: column; align-items: stretch; gap: 1rem; }
+    .date-range, .checkboxes { justify-content: space-between; }
+    .date-range input { width: 45%; }
+}
+@media (min-width: 901px) {
+    .mobile-view { display: none; }
 }
 </style>
