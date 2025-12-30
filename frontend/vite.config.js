@@ -10,6 +10,6 @@ export default defineConfig(({ mode }) => {
       port: 3000,
       open: true,
     },
-    base: env.NODE_ENV === "production" ? "/smart-due/" : "/",
+    base: env.NODE_ENV === "production" ? "/sf-admin-nexus/" : "/",
   };
 });
