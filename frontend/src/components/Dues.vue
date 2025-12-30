@@ -31,40 +31,40 @@
       <table>
         <thead>
           <tr>
-            <th class="col-biller">Biller</th>
-            <th @click="sortBy('billing_date')" class="sortable col-date">
-              Invoiced On <span v-if="sortColumn === 'billing_date'">{{ sortDirection === "asc" ? "↑" : "↓" }}</span>
+            <th>Biller</th>
+            <th @click="sortBy('billing_date')" class="sortable">
+              Billing Date <span v-if="sortColumn === 'billing_date'">{{ sortDirection === "asc" ? "↑" : "↓" }}</span>
             </th>
-            <th @click="sortBy('amount')" class="sortable col-amount">
+            <th @click="sortBy('amount')" class="sortable">
               Amount <span v-if="sortColumn === 'amount'">{{ sortDirection === "asc" ? "↑" : "↓" }}</span>
             </th>
-            <th @click="sortBy('due_date')" class="sortable col-date">
+            <th @click="sortBy('due_date')" class="sortable">
               Due Date <span v-if="sortColumn === 'due_date'">{{ sortDirection === "asc" ? "↑" : "↓" }}</span>
             </th>
-            <th class="col-status">Status</th>
-            <th class="col-executive">Executive</th>
-            <th class="text-right col-actions">Actions</th>
+            <th>Status</th>
+            <th>Executive</th>
+            <th class="text-right">Actions</th>
           </tr>
         </thead>
         <tbody>
           <tr v-for="bill in filteredBills" :key="bill.id">
-            <td class="font-medium col-biller" :title="bill.biller">{{ bill.biller }}</td>
-            <td class="col-date">{{ formatIndianDate(bill.billing_date) }}</td>
-            <td class="font-bold col-amount">{{ formatIndianCurrency(bill.amount) }}</td>
-            <td class="col-date">
+            <td class="font-medium">{{ bill.biller }}</td>
+            <td>{{ formatIndianDate(bill.billing_date) }}</td>
+            <td class="font-bold">{{ formatIndianCurrency(bill.amount) }}</td>
+            <td>
                 <div>{{ formatIndianDate(bill.due_date) }}</div>
-                <small class="text-muted" style="font-size: 0.7em;">{{ getDueInDays(bill) }}</small>
+                <small class="text-muted">{{ getDueInDays(bill) }}</small>
             </td>
-            <td class="col-status">
+            <td>
               <span class="badge" :class="getStatusBadgeClass(bill)">
                 {{ getStatus(bill) }}
               </span>
             </td>
-            <td class="col-executive" :title="bill.executive">{{ bill.executive }}</td>
-            <td class="text-right col-actions">
+            <td>{{ bill.executive }}</td>
+            <td class="text-right">
               <div class="action-group">
                 <button class="btn btn-secondary btn-icon" @click="$emit('edit-bill', bill)" title="Edit">
-                  <i class="ph ph-pencil-simple"></i>
+                  ✏️
                 </button>
                 <button 
                   v-if="!bill.is_paid" 
@@ -72,7 +72,7 @@
                   @click="$emit('mark-paid', bill)" 
                   title="Mark Paid"
                 >
-                  <i class="ph ph-check"></i>
+                  ✅
                 </button>
                 <button 
                   v-if="bill.is_paid" 
@@ -80,10 +80,10 @@
                   @click="$emit('mark-unpaid', bill)" 
                   title="Mark Unpaid"
                 >
-                  <i class="ph ph-arrow-u-up-left"></i>
+                  ↩️
                 </button>
                 <button class="btn btn-secondary btn-icon" @click="$emit('show-bank-info', bill)" title="Bank Info">
-                  <i class="ph ph-bank"></i>
+                  🏦
                 </button>
               </div>
             </td>

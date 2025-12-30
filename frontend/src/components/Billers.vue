@@ -12,28 +12,28 @@
       <table>
         <thead>
           <tr>
-            <th class="col-biller">Name</th>
-            <th class="col-status">Credit Days</th>
-            <th class="col-account">Account Details</th>
-            <th class="col-executive">Executive</th>
-            <th class="text-right col-actions">Actions</th>
+            <th>Name</th>
+            <th>Credit Days</th>
+            <th>Account Details</th>
+            <th>Executive</th>
+            <th class="text-right">Actions</th>
           </tr>
         </thead>
         <tbody>
           <tr v-for="biller in filteredBillers" :key="biller.id">
-            <td class="font-bold col-biller" :title="biller.name">{{ biller.name }}</td>
-            <td class="col-status">{{ biller.creditDuration }} days</td>
-            <td class="col-account">
+            <td class="font-bold">{{ biller.name }}</td>
+            <td>{{ biller.creditDuration }} days</td>
+            <td>
                 <div class="text-sm">
-                    <div class="font-medium truncate" :title="biller.bankName">{{ biller.bankName }}</div>
+                    <div class="font-medium">{{ biller.bankName }}</div>
                     <div class="text-muted">{{ biller.accountNo }}</div>
                     <div class="text-muted text-xs">{{ biller.ifsc }}</div>
                 </div>
             </td>
-            <td class="col-executive" :title="biller.executive">{{ biller.executive }}</td>
-            <td class="text-right col-actions">
+            <td>{{ biller.executive }}</td>
+            <td class="text-right">
                 <button class="btn btn-secondary btn-icon" @click="$emit('edit-biller', biller)" title="Edit">
-                    <i class="ph ph-pencil-simple"></i>
+                    ✏️
                 </button>
             </td>
           </tr>
@@ -50,7 +50,7 @@
         <div class="card-body">
             <div class="flex justify-between items-start mb-2">
                  <h3 class="text-lg font-bold">{{ biller.name }}</h3>
-                 <button class="btn btn-secondary btn-icon" @click="$emit('edit-biller', biller)"><i class="ph ph-pencil-simple"></i></button>
+                 <button class="btn btn-secondary btn-icon" @click="$emit('edit-biller', biller)">✏️</button>
             </div>
             
              <div class="grid-details mb-4">

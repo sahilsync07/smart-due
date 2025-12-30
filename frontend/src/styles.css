@@ -75,8 +75,8 @@ body {
 
 /* Custom Scrollbar */
 ::-webkit-scrollbar {
-    width: 6px;
-    height: 6px;
+    width: 8px;
+    height: 8px;
 }
 
 ::-webkit-scrollbar-track {
@@ -85,11 +85,13 @@ body {
 
 ::-webkit-scrollbar-thumb {
     background: #cbd5e1;
-    border-radius: 3px;
+    /* Slate 300 */
+    border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
     background: #94a3b8;
+    /* Slate 400 */
 }
 
 /* --- Layout Utility Classes --- */
@@ -102,10 +104,9 @@ body {
 
 .main-content {
     flex: 1;
-    padding: 1.5rem;
-    /* Reduced padding */
-    max-width: 100%;
-    margin: 0;
+    padding: 2rem;
+    max-width: 1920px;
+    margin: 0 auto;
     width: 100%;
 }
 
@@ -154,14 +155,12 @@ button {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    padding: 0.4rem 0.75rem;
-    /* Reduced padding */
-    font-size: 0.8125rem;
-    /* Smaller font */
+    padding: 0.5rem 1rem;
+    font-size: 0.875rem;
     font-weight: 500;
     border-radius: var(--radius-md);
     transition: all 0.2s ease;
-    gap: 0.4rem;
+    gap: 0.5rem;
     white-space: nowrap;
 }
 
@@ -210,19 +209,12 @@ button {
 }
 
 .btn-icon {
-    padding: 0.35rem;
-    /* Smaller padding */
-    border-radius: var(--radius-sm);
-    /* Smaller radius */
+    padding: 0.5rem;
+    border-radius: var(--radius-md);
     display: inline-flex;
     align-items: center;
     justify-content: center;
     line-height: 1;
-}
-
-.btn-icon i {
-    font-size: 1.1rem;
-    /* Adjust icon size */
 }
 
 /* --- Components: Inputs & Forms --- */
@@ -242,8 +234,8 @@ button {
 .form-control {
     display: block;
     width: 100%;
-    padding: 0.5rem 0.75rem;
-    font-size: 0.9rem;
+    padding: 0.625rem 0.875rem;
+    font-size: 0.95rem;
     line-height: 1.5;
     color: var(--text-main);
     background-color: var(--bg-surface);
@@ -274,7 +266,7 @@ button {
 }
 
 .card-header {
-    padding: 1rem 1.25rem;
+    padding: 1.25rem 1.5rem;
     border-bottom: 1px solid var(--border);
     background-color: var(--bg-subtle);
     display: flex;
@@ -283,7 +275,7 @@ button {
 }
 
 .card-body {
-    padding: 1.25rem;
+    padding: 1.5rem;
 }
 
 /* --- Components: Tables --- */
@@ -297,31 +289,26 @@ button {
 }
 
 table {
-    width: auto;
+    width: 100%;
     border-collapse: collapse;
     white-space: nowrap;
-    table-layout: fixed;
-    /* Enforce specific widths */
 }
 
 th {
     text-align: left;
-    padding: 0.5rem 0.75rem;
-    /* Super Compact padding */
+    padding: 1rem 1.5rem;
     font-size: 0.75rem;
     font-weight: 600;
     text-transform: uppercase;
-    letter-spacing: 0.03em;
+    letter-spacing: 0.05em;
     color: var(--text-secondary);
     background-color: var(--bg-subtle);
     border-bottom: 1px solid var(--border);
 }
 
 td {
-    padding: 0.4rem 0.75rem;
-    /* Super Compact padding */
-    font-size: 0.8125rem;
-    /* 13px font */
+    padding: 1rem 1.5rem;
+    font-size: 0.875rem;
     color: var(--text-main);
     border-bottom: 1px solid var(--border);
     vertical-align: middle;
@@ -335,68 +322,13 @@ tr:hover td {
     background-color: var(--bg-subtle);
 }
 
-/* Column Utilities for Compactness */
-.col-biller {
-    max-width: 110px;
-    width: 110px;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-}
-
-.col-executive {
-    max-width: 80px;
-    width: 80px;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-}
-
-.col-date {
-    width: 90px;
-}
-
-.col-status {
-    width: 80px;
-}
-
-.col-amount {
-    width: 90px;
-}
-
-.col-actions {
-    width: 100px;
-    text-align: right;
-}
-
-.col-items {
-    max-width: 140px;
-    width: 140px;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-}
-
-.col-transport {
-    width: 90px;
-}
-
-.col-account {
-    min-width: 180px;
-    width: 180px;
-    white-space: normal;
-    /* Account details might wrap */
-    line-height: 1.2;
-}
-
 /* --- Badges --- */
 
 .badge {
     display: inline-flex;
     align-items: center;
-    padding: 0.15rem 0.5rem;
-    /* Compact badge */
-    font-size: 0.7rem;
+    padding: 0.25rem 0.625rem;
+    font-size: 0.75rem;
     font-weight: 600;
     border-radius: var(--radius-full);
     line-height: 1;
@@ -424,7 +356,6 @@ tr:hover td {
 
 /* --- Popups / Modals --- */
 
-/* ... same as before, maybe adjust padding ... */
 .modal-backdrop {
     position: fixed;
     top: 0;
@@ -455,7 +386,7 @@ tr:hover td {
 }
 
 .modal-header {
-    padding: 1.25rem;
+    padding: 1.5rem;
     border-bottom: 1px solid var(--border);
     display: flex;
     justify-content: space-between;
@@ -463,11 +394,11 @@ tr:hover td {
 }
 
 .modal-body {
-    padding: 1.25rem;
+    padding: 1.5rem;
 }
 
 .modal-footer {
-    padding: 1rem 1.25rem;
+    padding: 1.25rem 1.5rem;
     border-top: 1px solid var(--border);
     background-color: var(--bg-subtle);
     display: flex;
@@ -540,12 +471,12 @@ tr:hover td {
 /* --- Mobile Queries --- */
 @media (max-width: 768px) {
     .main-content {
-        padding: 0.75rem;
+        padding: 1rem;
     }
 
     th,
     td {
-        padding: 0.5rem;
+        padding: 0.75rem 1rem;
     }
 
     .hide-on-mobile {

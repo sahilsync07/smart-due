@@ -5,31 +5,31 @@
       <table>
         <thead>
           <tr>
-            <th class="col-biller">Biller</th>
-            <th class="col-date">Placed On</th>
-            <th class="col-items">Items</th>
-            <th class="col-transport">Transport</th>
-            <th class="col-actions">Drive Link</th>
-            <th class="col-executive">Executive</th>
+            <th>Biller</th>
+            <th>Placed On</th>
+            <th>Items</th>
+            <th>Transport</th>
+            <th>Drive Link</th>
+            <th>Executive</th>
           </tr>
         </thead>
         <tbody>
           <tr v-for="order in orders" :key="order.id">
-            <td class="font-medium col-biller" :title="order.biller">{{ order.biller }}</td>
-            <td class="col-date">{{ formatIndianDate(order.order_placed_on) }}</td>
-            <td class="truncate-text col-items" :title="order.order_items">{{ order.order_items }}</td>
-            <td class="col-transport">{{ order.transport }}</td>
-            <td class="col-actions">
+            <td class="font-medium">{{ order.biller }}</td>
+            <td>{{ formatIndianDate(order.order_placed_on) }}</td>
+            <td class="truncate-text" :title="order.order_items">{{ order.order_items }}</td>
+            <td>{{ order.transport }}</td>
+            <td>
                 <div class="flex gap-2">
                     <a :href="order.drive_link" target="_blank" class="btn btn-secondary btn-icon" title="Open Link">
-                        <i class="ph ph-link"></i>
+                        🔗
                     </a>
                     <button class="btn btn-secondary btn-icon" @click="$emit('copy-link', order.drive_link)" title="Copy Link">
-                        <i class="ph ph-copy"></i>
+                        📋
                     </button>
                 </div>
             </td>
-            <td class="col-executive" :title="order.executive">{{ order.executive }}</td>
+            <td>{{ order.executive }}</td>
           </tr>
           <tr v-if="orders.length === 0">
               <td colspan="6" class="text-center py-4">No recent orders found.</td>
