@@ -33,7 +33,7 @@
             <td>{{ biller.executive }}</td>
             <td class="text-right">
                 <button class="btn btn-secondary btn-icon" @click="$emit('edit-biller', biller)" title="Edit">
-                    ✏️
+                    <i class="ph ph-pencil-simple"></i>
                 </button>
             </td>
           </tr>
@@ -50,7 +50,7 @@
         <div class="card-body">
             <div class="flex justify-between items-start mb-2">
                  <h3 class="text-lg font-bold">{{ biller.name }}</h3>
-                 <button class="btn btn-secondary btn-icon" @click="$emit('edit-biller', biller)">✏️</button>
+                 <button class="btn btn-secondary btn-icon" @click="$emit('edit-biller', biller)"><i class="ph ph-pencil-simple"></i></button>
             </div>
             
              <div class="grid-details mb-4">

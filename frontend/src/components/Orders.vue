@@ -22,10 +22,10 @@
             <td>
                 <div class="flex gap-2">
                     <a :href="order.drive_link" target="_blank" class="btn btn-secondary btn-icon" title="Open Link">
-                        🔗
+                        <i class="ph ph-link"></i>
                     </a>
                     <button class="btn btn-secondary btn-icon" @click="$emit('copy-link', order.drive_link)" title="Copy Link">
-                        📋
+                        <i class="ph ph-copy"></i>
                     </button>
                 </div>
             </td>

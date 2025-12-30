@@ -73,6 +73,25 @@ body {
     line-height: 1.5;
 }
 
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #94a3b8;
+}
+
 /* --- Layout Utility Classes --- */
 
 .app-layout {
@@ -275,7 +294,8 @@ table {
 
 th {
     text-align: left;
-    padding: 1rem 1.5rem;
+    padding: 0.75rem 1rem;
+    /* Compact padding */
     font-size: 0.75rem;
     font-weight: 600;
     text-transform: uppercase;
@@ -286,7 +306,8 @@ th {
 }
 
 td {
-    padding: 1rem 1.5rem;
+    padding: 0.75rem 1rem;
+    /* Compact padding */
     font-size: 0.875rem;
     color: var(--text-main);
     border-bottom: 1px solid var(--border);

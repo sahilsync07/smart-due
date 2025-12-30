@@ -64,7 +64,7 @@
             <td class="text-right">
               <div class="action-group">
                 <button class="btn btn-secondary btn-icon" @click="$emit('edit-bill', bill)" title="Edit">
-                  ✏️
+                  <i class="ph ph-pencil-simple"></i>
                 </button>
                 <button 
                   v-if="!bill.is_paid" 
@@ -72,7 +72,7 @@
                   @click="$emit('mark-paid', bill)" 
                   title="Mark Paid"
                 >
-                  ✅
+                  <i class="ph ph-check"></i>
                 </button>
                 <button 
                   v-if="bill.is_paid" 
@@ -80,10 +80,10 @@
                   @click="$emit('mark-unpaid', bill)" 
                   title="Mark Unpaid"
                 >
-                  ↩️
+                  <i class="ph ph-arrow-u-up-left"></i>
                 </button>
                 <button class="btn btn-secondary btn-icon" @click="$emit('show-bank-info', bill)" title="Bank Info">
-                  🏦
+                  <i class="ph ph-bank"></i>
                 </button>
               </div>
             </td>
