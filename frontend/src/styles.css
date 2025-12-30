@@ -104,8 +104,8 @@ body {
 
 .main-content {
     flex: 1;
-    padding: 2rem;
-    max-width: 1920px;
+    padding: 1.5rem;
+    max-width: 1600px;
     margin: 0 auto;
     width: 100%;
 }
@@ -209,14 +209,12 @@ button {
 }
 
 .btn-icon {
-    padding: 0.35rem;
+    padding: 0.5rem;
     border-radius: var(--radius-md);
     display: inline-flex;
     align-items: center;
     justify-content: center;
     line-height: 1;
-    min-width: 32px;
-    height: 32px;
 }
 
 /* --- Components: Inputs & Forms --- */
@@ -298,7 +296,7 @@ table {
 
 th {
     text-align: left;
-    padding: 0.75rem 0.5rem;
+    padding: 1rem 1.5rem;
     font-size: 0.75rem;
     font-weight: 600;
     text-transform: uppercase;
@@ -309,7 +307,7 @@ th {
 }
 
 td {
-    padding: 0.75rem 0.5rem;
+    padding: 1rem 1.5rem;
     font-size: 0.875rem;
     color: var(--text-main);
     border-bottom: 1px solid var(--border);

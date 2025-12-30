@@ -33,7 +33,7 @@
             <td>{{ biller.executive }}</td>
             <td class="text-right">
                 <button class="btn btn-secondary btn-icon" @click="$emit('edit-biller', biller)" title="Edit">
-                    ✏️
+                    <i class="ph ph-pencil-simple"></i>
                 </button>
             </td>
           </tr>
