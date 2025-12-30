@@ -297,9 +297,11 @@ button {
 }
 
 table {
-    width: 100%;
+    width: auto;
     border-collapse: collapse;
     white-space: nowrap;
+    table-layout: fixed;
+    /* Enforce specific widths */
 }
 
 th {
@@ -365,6 +367,26 @@ tr:hover td {
 .col-actions {
     width: 100px;
     text-align: right;
+}
+
+.col-items {
+    max-width: 140px;
+    width: 140px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.col-transport {
+    width: 90px;
+}
+
+.col-account {
+    min-width: 180px;
+    width: 180px;
+    white-space: normal;
+    /* Account details might wrap */
+    line-height: 1.2;
 }
 
 /* --- Badges --- */

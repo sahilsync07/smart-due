@@ -12,26 +12,26 @@
       <table>
         <thead>
           <tr>
-            <th>Name</th>
-            <th>Credit Days</th>
-            <th>Account Details</th>
-            <th>Executive</th>
-            <th class="text-right">Actions</th>
+            <th class="col-biller">Name</th>
+            <th class="col-status">Credit Days</th>
+            <th class="col-account">Account Details</th>
+            <th class="col-executive">Executive</th>
+            <th class="text-right col-actions">Actions</th>
           </tr>
         </thead>
         <tbody>
           <tr v-for="biller in filteredBillers" :key="biller.id">
-            <td class="font-bold">{{ biller.name }}</td>
-            <td>{{ biller.creditDuration }} days</td>
-            <td>
+            <td class="font-bold col-biller" :title="biller.name">{{ biller.name }}</td>
+            <td class="col-status">{{ biller.creditDuration }} days</td>
+            <td class="col-account">
                 <div class="text-sm">
-                    <div class="font-medium">{{ biller.bankName }}</div>
+                    <div class="font-medium truncate" :title="biller.bankName">{{ biller.bankName }}</div>
                     <div class="text-muted">{{ biller.accountNo }}</div>
                     <div class="text-muted text-xs">{{ biller.ifsc }}</div>
                 </div>
             </td>
-            <td>{{ biller.executive }}</td>
-            <td class="text-right">
+            <td class="col-executive" :title="biller.executive">{{ biller.executive }}</td>
+            <td class="text-right col-actions">
                 <button class="btn btn-secondary btn-icon" @click="$emit('edit-biller', biller)" title="Edit">
                     <i class="ph ph-pencil-simple"></i>
                 </button>
