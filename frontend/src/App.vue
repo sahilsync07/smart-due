@@ -1,7 +1,7 @@
 <template>
   <div class="app-layout">
     <!-- Sidebar Navigation (Desktop) -->
-    <aside class="sidebar" :class="{ 'open': isSidebarOpen }">
+    <aside class="sidebar" :class="{ 'open': isSidebarOpen, 'collapsed': isSidebarCollapsed && !isMobile }">
       <div class="sidebar-header">
         <div class="brand">
           <div class="logo-icon">AN</div>
@@ -10,6 +10,15 @@
             <span>Shree Footwear</span>
           </div>
         </div>
+        <!-- Collapse Toggle (Desktop Only) -->
+        <button 
+          v-if="!isMobile" 
+          class="collapse-btn" 
+          @click="toggleSidebarCollapse"
+          title="Toggle Sidebar"
+        >
+          <i class="ph" :class="isSidebarCollapsed ? 'ph-caret-right' : 'ph-caret-left'"></i>
+        </button>
       </div>
       
       <nav class="sidebar-nav">
@@ -18,32 +27,40 @@
           class="nav-item" 
           :class="{ active: activeTab === 'dues' }"
           @click.prevent="switchTab('dues')"
+          title="Dues"
         >
-          <span class="icon">💰</span> Dues
+          <span class="icon"><i class="ph ph-currency-inr"></i></span>
+          <span class="label">Dues</span>
         </a>
         <a 
           href="#" 
           class="nav-item" 
           :class="{ active: activeTab === 'orders' }"
           @click.prevent="switchTab('orders')"
+           title="Orders"
         >
-          <span class="icon">📦</span> Orders
+          <span class="icon"><i class="ph ph-package"></i></span>
+          <span class="label">Orders</span>
         </a>
         <a 
           href="#" 
           class="nav-item" 
           :class="{ active: activeTab === 'billers' }"
           @click.prevent="switchTab('billers')"
+           title="Billers"
         >
-          <span class="icon">👥</span> Billers
+          <span class="icon"><i class="ph ph-users"></i></span>
+          <span class="label">Billers</span>
         </a>
         <a 
           href="#" 
           class="nav-item" 
           :class="{ active: activeTab === 'pdf' }"
           @click.prevent="switchTab('pdf')"
+           title="PDF Generator"
         >
-          <span class="icon">📄</span> PDF Generator
+          <span class="icon"><i class="ph ph-file-pdf"></i></span>
+          <span class="label">PDF Generator</span>
         </a>
       </nav>
 
@@ -61,13 +78,13 @@
     <!-- Mobile Header -->
     <header class="mobile-header">
       <button class="menu-btn" @click="toggleSidebar">
-        ☰
+        <i class="ph ph-list"></i>
       </button>
       <div class="mobile-brand">Admin Nexus</div>
     </header>
 
     <!-- Main Content -->
-    <main class="main-content">
+    <main class="main-content" :class="{ 'expanded': isSidebarCollapsed && !isMobile }">
       <!-- Top Bar with Actions -->
       <div class="top-bar">
         <h2 class="page-title">{{ pageTitle }}</h2>
@@ -77,10 +94,11 @@
             class="btn btn-primary"
             @click="openAddPopup"
           >
-            <span class="icon">+</span> Add New
+            <i class="ph ph-plus"></i> Add New
           </button>
         </div>
       </div>
+
 
       <!-- Content Area -->
       <div class="content-area">
@@ -334,6 +352,7 @@ export default {
     return {
       activeTab: "dues",
       isSidebarOpen: false,
+      isSidebarCollapsed: false,
       bills: [],
       orders: [],
       billers: [],
@@ -416,6 +435,9 @@ export default {
     },
     toggleSidebar() {
       this.isSidebarOpen = !this.isSidebarOpen;
+    },
+    toggleSidebarCollapse() {
+        this.isSidebarCollapsed = !this.isSidebarCollapsed;
     },
     openAddPopup() {
         if(this.activeTab === 'dues') this.openBillPopup();
@@ -766,7 +788,73 @@ export default {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
-  padding: 0; /* Reset for inner structure */
+  padding: 0;
+  transition: margin-left 0.3s ease;
+}
+
+.main-content.expanded {
+    margin-left: var(--sidebar-width-collapsed);
+}
+
+.sidebar.collapsed {
+    width: var(--sidebar-width-collapsed);
+}
+
+.sidebar.collapsed .brand-text,
+.sidebar.collapsed .nav-item .label,
+.sidebar.collapsed .user-details {
+    display: none;
+}
+
+.sidebar.collapsed .sidebar-header {
+    justify-content: center;
+    padding: 0;
+}
+
+.sidebar.collapsed .brand {
+    justify-content: center;
+}
+
+.sidebar.collapsed .nav-item {
+    justify-content: center;
+    padding: 0.75rem 0;
+}
+
+.sidebar.collapsed .nav-item .icon {
+    margin: 0;
+    font-size: 1.5rem;
+}
+
+.sidebar.collapsed .user-info {
+    justify-content: center;
+}
+
+.collapse-btn {
+    position: absolute;
+    right: -12px;
+    top: 20px;
+    width: 24px;
+    height: 24px;
+    background: var(--bg-surface);
+    border: 1px solid var(--border);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    color: var(--text-secondary);
+    box-shadow: var(--shadow-sm);
+    z-index: 50;
+    transition: all 0.2s;
+}
+
+.sidebar.collapsed .collapse-btn {
+    right: -12px;
+}
+
+.collapse-btn:hover {
+    color: var(--primary);
+    border-color: var(--primary);
 }
 
 .top-bar {
