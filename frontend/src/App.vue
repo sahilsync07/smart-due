@@ -6,7 +6,8 @@
       :initials="companyInitials"
       :companies="companies"
       :isLoading="authLoading"
-      @login="handleLogin"
+      @login-manual="handleLoginManual"
+      @signup-manual="handleSignupManual"
       @switch-company="handleCompanySwitchFromLogin"
     />
     <div v-else class="app-layout-inner">
@@ -82,7 +83,7 @@
         <div class="user-info">
           <div class="avatar">S</div>
           <div class="user-details">
-            <span class="name">{{ user ? (user.user_metadata.full_name || user.email) : 'Sahil Kumar' }}</span>
+            <span class="name">{{ user ? user.full_name : 'User' }}</span>
             <span class="role">Sign Out</span>
           </div>
         </div>
@@ -349,7 +350,7 @@
 </template>
 
 <script>
-import { getSupabase } from "./utils/supabase";
+import { supabase } from "./utils/supabase";
 import axios from "axios";
 import Dues from "./components/Dues.vue";
 import Orders from "./components/Orders.vue";
@@ -418,8 +419,8 @@ export default {
     };
   },
   computed: {
-    db() {
-      return getSupabase(this.selectedCompany);
+    tableSuffix() {
+        return this.selectedCompany === "Shree Footwear" ? "_sf" : "_sb";
     },
     currentTabComponent() {
       if (this.activeTab === 'dues') return 'Dues';
@@ -524,7 +525,7 @@ export default {
       this.isLoading = false;
     },
     async fetchBills() {
-      const { data, error } = await this.db.from("dues").select("*");
+      const { data, error } = await supabase.from(`dues${this.tableSuffix}`).select("*");
       if (error) {
         console.error("Error fetching bills:", error);
         return;
@@ -532,7 +533,7 @@ export default {
       this.bills = data || [];
     },
     async fetchOrders() {
-      const { data, error } = await this.db.from("orders").select("*");
+      const { data, error } = await supabase.from(`orders${this.tableSuffix}`).select("*");
       if (error) {
         console.error("Error fetching orders:", error);
         return;
@@ -540,7 +541,7 @@ export default {
       this.orders = data || [];
     },
     async fetchBillers() {
-      const { data, error } = await this.db.from("billers").select("*");
+      const { data, error } = await supabase.from(`billers${this.tableSuffix}`).select("*");
       if (error) {
         console.error("Error fetching billers:", error);
         return;
@@ -598,12 +599,12 @@ export default {
       this.saving = true;
       let error;
       if (this.editBillMode) {
-        ({ error } = await this.db
-          .from("dues")
+        ({ error } = await supabase
+          .from(`dues${this.tableSuffix}`)
           .update(this.newBill)
           .eq("id", this.newBill.id));
       } else {
-        ({ error } = await this.db.from("dues").insert(this.newBill));
+        ({ error } = await supabase.from(`dues${this.tableSuffix}`).insert(this.newBill));
       }
       this.saving = false;
       if (error) {
@@ -623,8 +624,8 @@ export default {
     },
     async markPaid(bill) {
       const today = new Date().toISOString().split("T")[0];
-      const { error } = await this.db
-        .from("dues")
+      const { error } = await supabase
+        .from(`dues${this.tableSuffix}`)
         .update({ is_paid: true, paid_on: today })
         .eq("id", bill.id);
       if (error) {
@@ -635,8 +636,8 @@ export default {
       await this.fetchBills();
     },
     async markUnpaid(bill) {
-      const { error } = await this.db
-        .from("dues")
+      const { error } = await supabase
+        .from(`dues${this.tableSuffix}`)
         .update({ is_paid: false, paid_on: null })
         .eq("id", bill.id);
       if (error) {
@@ -687,7 +688,7 @@ export default {
     },
     async saveOrder() {
       this.saving = true;
-      const { error } = await this.db.from("orders").insert(this.newOrder);
+      const { error } = await supabase.from(`orders${this.tableSuffix}`).insert(this.newOrder);
       this.saving = false;
       if (error) {
         this.showToast("Error saving order", "error");
@@ -730,12 +731,12 @@ export default {
       this.saving = true;
       let error;
       if (this.editBillerMode) {
-        ({ error } = await this.db
-          .from("billers")
+        ({ error } = await supabase
+          .from(`billers${this.tableSuffix}`)
           .update(this.newBiller)
           .eq("id", this.newBiller.id));
       } else {
-        ({ error } = await this.db.from("billers").insert(this.newBiller));
+        ({ error } = await supabase.from(`billers${this.tableSuffix}`).insert(this.newBiller));
       }
       this.saving = false;
       if (error) {
@@ -781,38 +782,120 @@ export default {
     },
     async checkUser() {
         this.authLoading = true;
-        const { data: { session }, error } = await this.db.auth.getSession();
-        if (error) {
-             console.error("Auth check error", error);
-             this.user = null;
+        const storedUser = localStorage.getItem('nexus_user');
+        if (storedUser) {
+            this.user = JSON.parse(storedUser);
+            // Verify if still valid / approved for current company
+            await this.verifyUserAccess();
         } else {
-            this.user = session?.user || null;
+            this.user = null;
         }
         this.authLoading = false;
-        
-        // Setup listener for this specific client instance
-        this.db.auth.onAuthStateChange((_event, session) => {
-            this.user = session?.user || null;
-            if(this.user) this.fetchData();
-        });
     },
-    async handleLogin() {
-        this.authLoading = true;
-        const { error } = await this.db.auth.signInWithOAuth({
-            provider: 'google',
-            options: {
-                redirectTo: window.location.origin
-            }
-        });
-        if(error) {
-            this.showToast("Login failed: " + error.message, "error");
-            this.authLoading = false;
+    async verifyUserAccess() {
+        if (!this.user) return;
+        
+        // We fetch the fresh user record to check approval status
+        const { data, error } = await supabase.from('app_users')
+            .select('*')
+            .eq('id', this.user.id)
+            .single();
+
+        if (error || !data) {
+            this.handleLogout();
+            return;
+        }
+
+        // Check company specific approval
+        const isApproved = this.checkApproval(data);
+        if (!isApproved) {
+            this.handleLogout(true); // true = forced due to permission
+        } else {
+            // Update local user data with fresh data (in case role/approval changed)
+            this.user = data;
+            localStorage.setItem('nexus_user', JSON.stringify(data));
         }
     },
-    async handleLogout() {
-        await this.db.auth.signOut();
+    checkApproval(userData) {
+        if (this.selectedCompany === "Shree Footwear") return userData.sf_approved;
+        if (this.selectedCompany === "Sri Brundabana Enterprises") return userData.sb_approved;
+        return false;
+    },
+    async handleLoginManual({ email, password }) {
+        this.authLoading = true;
+        try {
+            // Simple query to match email and password
+            // Note: In real production, password should be hashed. 
+            // Here we match plain text as per user instruction for custom implementation.
+            const { data, error } = await supabase.from('app_users')
+                .select('*')
+                .eq('email', email)
+                .eq('password', password)
+                .single();
+
+            if (error || !data) {
+                this.showToast("Invalid credentials", "error");
+                this.authLoading = false;
+                return;
+            }
+
+            if (!this.checkApproval(data)) {
+                 this.showToast("Account not approved for " + this.selectedCompany, "error");
+                 this.authLoading = false;
+                 return;
+            }
+
+            this.user = data;
+            localStorage.setItem('nexus_user', JSON.stringify(data));
+            this.fetchData();
+            this.showToast("Welcome back, " + data.full_name, "success");
+
+        } catch (err) {
+            console.error("Login Error", err);
+            this.showToast("Login error occurred", "error");
+        }
+        this.authLoading = false;
+    },
+    async handleSignupManual({ email, password, full_name }) {
+        this.authLoading = true;
+        
+        // Check if user exists
+        const { data: existing } = await supabase.from('app_users').select('id').eq('email', email).single();
+        if (existing) {
+             this.showToast("Email already exists", "error");
+             this.authLoading = false;
+             return;
+        }
+
+        // Create new user (Not approved by default)
+        const newUser = {
+            email,
+            password,
+            full_name,
+            role: 'Executive',
+            sf_approved: false,
+            sb_approved: false
+        };
+
+        const { error } = await supabase.from('app_users').insert(newUser);
+        
+        if (error) {
+             console.error("Signup Error", error);
+             this.showToast("Error creating account", "error");
+        } else {
+             this.showToast("Account created! Please ask admin for approval.", "success");
+             this.toggleMode(); // Switch to login view in child component ideally, but here we just notify
+        }
+        this.authLoading = false;
+    },
+    async handleLogout(forced = false) {
+        localStorage.removeItem('nexus_user');
         this.user = null;
-        this.showToast("Logged out", "info");
+        if (forced) {
+            this.showToast("Access denied for this company. Please login again.", "warning");
+        } else {
+            this.showToast("Logged out", "info");
+        }
     },
     handleCompanySwitchFromLogin(company) {
         this.selectedCompany = company; // This triggers the watcher, which calls checkUser

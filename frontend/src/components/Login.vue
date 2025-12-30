@@ -8,17 +8,38 @@
       </div>
 
       <div class="login-actions">
-        <button class="btn-google" @click="$emit('login')" :disabled="isLoading">
-          <div class="google-icon-wrapper">
-            <svg class="google-icon" viewBox="0 0 48 48" width="24px" height="24px">
-              <path fill="#4285F4" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/>
-              <path fill="#34A853" d="M46.98 24.46c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/>
-              <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/>
-              <path fill="#EA4335" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/>
-            </svg>
-          </div>
-          <span class="btn-text">Sign in with Google</span>
-        </button>
+        <form @submit.prevent="handleSubmit">
+            <div v-if="!isLoginMode" class="form-group">
+                <input type="text" v-model="fullName" placeholder="Full Name" class="form-control" required />
+            </div>
+            
+            <div class="form-group">
+                <input type="email" v-model="email" placeholder="Email Address" class="form-control" required />
+            </div>
+            
+            <div class="form-group">
+                <input type="password" v-model="password" placeholder="Password" class="form-control" required />
+            </div>
+
+            <div v-if="!isLoginMode" class="form-group">
+                <input type="password" v-model="confirmPassword" placeholder="Confirm Password" class="form-control" required />
+                <small v-if="passwordMismatch" class="text-danger">Passwords do not match</small>
+            </div>
+
+            <div v-if="error" class="error-msg">{{ error }}</div>
+
+            <button type="submit" class="btn btn-primary w-full" :disabled="isLoading">
+                <span v-if="isLoading">Processing...</span>
+                <span v-else>{{ isLoginMode ? 'Sign In' : 'Create Account' }}</span>
+            </button>
+        </form>
+
+        <div class="switch-mode mt-4">
+            <span>{{ isLoginMode ? "New user?" : "Already have an account?" }}</span>
+            <button class="btn-text link-btn" @click="toggleMode">
+                {{ isLoginMode ? "Create an account" : "Sign In" }}
+            </button>
+        </div>
       </div>
 
       <div class="divider">
@@ -41,6 +62,47 @@ export default {
     initials: String,
     companies: Array,
     isLoading: Boolean
+  },
+  data() {
+    return {
+        isLoginMode: true,
+        email: "",
+        password: "",
+        confirmPassword: "",
+        fullName: "",
+        error: ""
+    }
+  },
+  computed: {
+    passwordMismatch() {
+        return !this.isLoginMode && this.password && this.confirmPassword && this.password !== this.confirmPassword;
+    }
+  },
+  methods: {
+    toggleMode() {
+        this.isLoginMode = !this.isLoginMode;
+        this.error = "";
+        this.password = "";
+        this.confirmPassword = "";
+    },
+    handleSubmit() {
+        this.error = "";
+        
+        if (!this.isLoginMode && this.passwordMismatch) {
+            this.error = "Passwords do not match";
+            return;
+        }
+
+        if (this.isLoginMode) {
+            this.$emit('login-manual', { email: this.email, password: this.password });
+        } else {
+            this.$emit('signup-manual', { 
+                email: this.email, 
+                password: this.password,
+                full_name: this.fullName
+            });
+        }
+    }
   }
 };
 </script>
@@ -168,4 +230,24 @@ export default {
 .company-select:hover {
     border-color: var(--primary);
 }
+.switch-mode {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+}
+.link-btn {
+    color: var(--primary);
+    font-weight: 600;
+    margin-left: 0.5rem;
+    padding: 0;
+}
+.error-msg {
+    color: var(--danger);
+    font-size: 0.875rem;
+    margin-bottom: 1rem;
+    background: var(--danger-bg);
+    padding: 0.5rem;
+    border-radius: var(--radius-sm);
+}
+.text-danger { color: var(--danger); font-size: 0.8rem; }
+.mt-4 { margin-top: 1rem; }
 </style>
