@@ -335,29 +335,31 @@ tr:hover td {
 
 /* Column Utilities for Compactness */
 .col-biller {
-    max-width: 15rem;
-    /* 240px */
+    max-width: 110px;
+    width: 110px;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
 }
 
 .col-executive {
-    max-width: 8rem;
+    max-width: 80px;
+    width: 80px;
     overflow: hidden;
     text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
 .col-date {
-    width: 6rem;
+    width: 90px;
 }
 
 .col-status {
-    width: 6rem;
+    width: 80px;
 }
 
 .col-amount {
-    width: 7rem;
+    width: 90px;
 }
 
 .col-actions {

@@ -352,7 +352,7 @@ export default {
     return {
       activeTab: "dues",
       isSidebarOpen: false,
-      isSidebarCollapsed: false,
+      isSidebarCollapsed: true,
       bills: [],
       orders: [],
       billers: [],
