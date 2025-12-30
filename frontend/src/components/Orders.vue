@@ -6,7 +6,7 @@
         <thead>
           <tr>
             <th>Biller</th>
-            <th class="col-date">Placed On</th>
+            <th>Placed On</th>
             <th>Items</th>
             <th>Transport</th>
             <th>Drive Link</th>

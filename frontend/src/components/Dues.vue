@@ -31,9 +31,9 @@
       <table>
         <thead>
           <tr>
-            <th>Biller</th>
+            <th class="col-biller">Biller</th>
             <th @click="sortBy('billing_date')" class="sortable col-date">
-              Billing Date <span v-if="sortColumn === 'billing_date'">{{ sortDirection === "asc" ? "↑" : "↓" }}</span>
+              Invoiced On <span v-if="sortColumn === 'billing_date'">{{ sortDirection === "asc" ? "↑" : "↓" }}</span>
             </th>
             <th @click="sortBy('amount')" class="sortable col-amount">
               Amount <span v-if="sortColumn === 'amount'">{{ sortDirection === "asc" ? "↑" : "↓" }}</span>
@@ -42,26 +42,26 @@
               Due Date <span v-if="sortColumn === 'due_date'">{{ sortDirection === "asc" ? "↑" : "↓" }}</span>
             </th>
             <th class="col-status">Status</th>
-            <th>Executive</th>
-            <th class="text-right">Actions</th>
+            <th class="col-executive">Executive</th>
+            <th class="text-right col-actions">Actions</th>
           </tr>
         </thead>
         <tbody>
           <tr v-for="bill in filteredBills" :key="bill.id">
-            <td class="font-medium">{{ bill.biller }}</td>
-            <td>{{ formatIndianDate(bill.billing_date) }}</td>
-            <td class="font-bold">{{ formatIndianCurrency(bill.amount) }}</td>
-            <td>
+            <td class="font-medium col-biller" :title="bill.biller">{{ bill.biller }}</td>
+            <td class="col-date">{{ formatIndianDate(bill.billing_date) }}</td>
+            <td class="font-bold col-amount">{{ formatIndianCurrency(bill.amount) }}</td>
+            <td class="col-date">
                 <div>{{ formatIndianDate(bill.due_date) }}</div>
-                <small class="text-muted">{{ getDueInDays(bill) }}</small>
+                <small class="text-muted" style="font-size: 0.7em;">{{ getDueInDays(bill) }}</small>
             </td>
-            <td>
+            <td class="col-status">
               <span class="badge" :class="getStatusBadgeClass(bill)">
                 {{ getStatus(bill) }}
               </span>
             </td>
-            <td>{{ bill.executive }}</td>
-            <td class="text-right">
+            <td class="col-executive" :title="bill.executive">{{ bill.executive }}</td>
+            <td class="text-right col-actions">
               <div class="action-group">
                 <button class="btn btn-secondary btn-icon" @click="$emit('edit-bill', bill)" title="Edit">
                   <i class="ph ph-pencil-simple"></i>
