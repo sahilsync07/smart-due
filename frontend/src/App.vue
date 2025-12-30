@@ -1,5 +1,15 @@
 <template>
   <div class="app-layout">
+    <Login 
+      v-if="!user" 
+      :companyName="selectedCompany" 
+      :initials="companyInitials"
+      :companies="companies"
+      :isLoading="authLoading"
+      @login="handleLogin"
+      @switch-company="handleCompanySwitchFromLogin"
+    />
+    <div v-else class="app-layout-inner">
     <!-- Sidebar Navigation (Desktop) -->
     <aside class="sidebar" :class="{ 'open': isSidebarOpen, 'collapsed': isSidebarCollapsed && !isMobile }">
       <div class="sidebar-header">
@@ -68,12 +78,12 @@
         </a>
       </nav>
 
-      <div class="sidebar-footer">
+       <div class="sidebar-footer" @click="handleLogout" title="Click to Logout">
         <div class="user-info">
           <div class="avatar">S</div>
           <div class="user-details">
-            <span class="name">Sahil Kumar</span>
-            <span class="role">Managing Director</span>
+            <span class="name">{{ user ? (user.user_metadata.full_name || user.email) : 'Sahil Kumar' }}</span>
+            <span class="role">Sign Out</span>
           </div>
         </div>
       </div>
@@ -334,6 +344,7 @@
     <div v-if="toast.message" class="toast" :class="toast.type">
       {{ toast.message }}
     </div>
+    </div>
   </div>
 </template>
 
@@ -344,6 +355,7 @@ import Dues from "./components/Dues.vue";
 import Orders from "./components/Orders.vue";
 import Billers from "./components/Billers.vue";
 import PdfGenerator from "./components/PdfGenerator.vue";
+import Login from "./components/Login.vue";
 
 export default {
   components: {
@@ -351,6 +363,7 @@ export default {
     Orders,
     Billers,
     PdfGenerator,
+    Login,
   },
   data() {
     return {
@@ -400,6 +413,8 @@ export default {
       toast: { message: "", type: "" },
       companies: ["Shree Footwear", "Sri Brundabana Enterprises"],
       selectedCompany: localStorage.getItem("selectedCompany") || "Shree Footwear",
+      user: null,
+      authLoading: false,
     };
   },
   computed: {
@@ -441,16 +456,27 @@ export default {
     "newBill.billing_date"() {
       this.calculateDueDate();
     },
-    selectedCompany(newVal) {
+    async selectedCompany(newVal) {
       localStorage.setItem("selectedCompany", newVal);
-      this.fetchData();
       this.applyTheme();
+      await this.checkUser(); // Re-check auth for the new project
+      if(this.user) {
+        this.fetchData();
+      }
       this.showToast(`Switched to ${newVal}`, "info");
     },
   },
   async mounted() {
     this.applyTheme();
-    await this.fetchData();
+    await this.checkUser();
+    if (this.user) {
+        await this.fetchData();
+    }
+    
+    // Listen for auth changes specially for this window
+    // Note: switching companies changes 'db' which is a new client.
+    // We already handle selectedCompany watch.
+    
     window.addEventListener("resize", this.handleResize);
   },
   methods: {
@@ -753,6 +779,44 @@ export default {
       // We can also update the border focus color to match
       root.style.setProperty("--border-focus", theme.primary);
     },
+    async checkUser() {
+        this.authLoading = true;
+        const { data: { session }, error } = await this.db.auth.getSession();
+        if (error) {
+             console.error("Auth check error", error);
+             this.user = null;
+        } else {
+            this.user = session?.user || null;
+        }
+        this.authLoading = false;
+        
+        // Setup listener for this specific client instance
+        this.db.auth.onAuthStateChange((_event, session) => {
+            this.user = session?.user || null;
+            if(this.user) this.fetchData();
+        });
+    },
+    async handleLogin() {
+        this.authLoading = true;
+        const { error } = await this.db.auth.signInWithOAuth({
+            provider: 'google',
+            options: {
+                redirectTo: window.location.origin
+            }
+        });
+        if(error) {
+            this.showToast("Login failed: " + error.message, "error");
+            this.authLoading = false;
+        }
+    },
+    async handleLogout() {
+        await this.db.auth.signOut();
+        this.user = null;
+        this.showToast("Logged out", "info");
+    },
+    handleCompanySwitchFromLogin(company) {
+        this.selectedCompany = company; // This triggers the watcher, which calls checkUser
+    }
   },
 };
 </script>
@@ -835,6 +899,10 @@ export default {
 .sidebar-footer {
   padding: 1rem;
   border-top: 1px solid var(--border);
+  cursor: pointer;
+}
+.sidebar-footer:hover {
+    background-color: var(--bg-subtle);
 }
 .user-info { display: flex; align-items: center; gap: 0.75rem; }
 .user-info .avatar {
